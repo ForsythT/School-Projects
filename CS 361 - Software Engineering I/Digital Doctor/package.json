@@ -101,7 +101,7 @@
     "async": "0.1.22",
     "ben": "0.0.x",
     "nodeunit": "0.8.x",
-    "semver": "1.1.0",
+    "semver": "6.3.0",
     "uglify-js": "1.1.x"
   },
   "directories": {},
