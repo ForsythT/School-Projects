@@ -1,0 +1,58 @@
+Basic Python Compiler Using LLVM --- CS 480 Final Project
+
+Tim Forsyth
+
+To start off, I'll say that I did not implement any extra credit. In other words, 
+only p1.py will compile using this compiler.
+
+How to run it:
+I tried to make it as simple as possible. Since I know only p1.py can be run with this compiler,
+I put a python_compiler.o rule in the Makefile that runs
+
+compile < testing_code/p1.py > p1.ll
+
+for you. Since python_compiler.o is then generated, the Makefile is also able to compile the
+C++ test program that runs the newly compiled p1.py function.
+
+So, all you have to do is run
+
+make
+
+and the code will compile and run the compiler with the p1.py code as input. The compiler also prints
+out the LLVM IR code, which is stored into p1.ll from the above command, so you can just run
+
+cat p1.ll
+
+to see the generated LLVM IR code. Then, to prove that the generated code does work, I made it so that
+the python_compiler function returns the value of the "sphere_surf_area" variable instead of void.
+Therefore, if you run
+
+./test
+
+it will output the calculated value of "sphere_surf_area" onto the terminal. To test the optimizations, just run
+
+compile -O < testing_code/p1.py
+
+and it will output the generated LLVM IR code onto the terminal. Then you can run the test again to see the same
+value for "sphere_surf_area".
+
+In short:
+Run the following commands to test the code:
+
+make
+cat p1.ll
+./test
+compile -O < testing_code/p1.py
+./test
+
+Design:
+As for my implementation, I basically just replaced all of the generateGVSpec functions in ast.cpp with 
+generateLLVMSpec functions that generated the appropriate LLVM IR code for each node. For example, Identifiers 
+return a load of the variable value and assignment statements alloca the identifier if it does not exist on the 
+symbol table.
+
+Inside main.cpp is where the initialization of the module occurs including initializing the function and entry
+block. The object code generation is also in main.cpp as well as the optimizations. For the optimizations, I 
+used the same ones that were used in the lecture example, so the LLVM IR code just ends up being a return statement
+of the load for "sphere_surf_area", which looks to be an address value. Running ./test confirms it to hold the
+value of "sphere_surf_area".
