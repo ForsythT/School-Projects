@@ -1,0 +1,5 @@
+To compile part 1 of the concurrency, type "gcc concurrency3-1.c -lpthread" into the command line on the OS2 server. Run with "a.out".
+Part 1 uses a semaphore to control the number of threads which are accessing the data at any given time.
+
+To compile part 2, type "gcc concurrency3-2.c -lpthread" into the command line. Run with "a.out".
+Part 2 uses mutexes which limit the types of threads which can access the linked list at any given time.

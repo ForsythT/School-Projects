@@ -1,0 +1,746 @@
+Binary files linux/arch/arm64/boot/Image and oldLinux/arch/arm64/boot/Image differ
+Binary files linux/arch/arm64/boot/Image.gz and oldLinux/arch/arm64/boot/Image.gz differ
+diff -urN linux/.config oldLinux/.config
+--- linux/.config	2018-11-26 21:58:48.331885584 -0800
++++ oldLinux/.config	2018-11-11 18:31:37.025038277 -0800
+@@ -4381,8 +4381,8 @@
+ CONFIG_LEDS_TRIGGER_TIMER=y
+ CONFIG_LEDS_TRIGGER_ONESHOT=y
+ # CONFIG_LEDS_TRIGGER_MTD is not set
+-CONFIG_LEDS_TRIGGER_HEARTBEAT=y
+ CONFIG_LEDS_TRIGGER_MORSE=y
++CONFIG_LEDS_TRIGGER_HEARTBEAT=y
+ CONFIG_LEDS_TRIGGER_BACKLIGHT=y
+ CONFIG_LEDS_TRIGGER_CPU=y
+ CONFIG_LEDS_TRIGGER_GPIO=y
+diff -urN linux/.config.old oldLinux/.config.old
+--- linux/.config.old	2018-11-25 15:36:14.092654582 -0800
++++ oldLinux/.config.old	2018-11-06 18:24:11.449700630 -0800
+@@ -2336,7 +2336,6 @@
+ # CONFIG_SERIAL_NONSTANDARD is not set
+ # CONFIG_N_GSM is not set
+ # CONFIG_TRACE_SINK is not set
+-CONFIG_CONFIG_DUMMY=y
+ CONFIG_DEVMEM=y
+ 
+ #
+@@ -4382,8 +4381,8 @@
+ CONFIG_LEDS_TRIGGER_TIMER=y
+ CONFIG_LEDS_TRIGGER_ONESHOT=y
+ # CONFIG_LEDS_TRIGGER_MTD is not set
++# CONFIG_LEDS_TRIGGER_MORSE is not set
+ CONFIG_LEDS_TRIGGER_HEARTBEAT=y
+-CONFIG_LEDS_TRIGGER_MORSE=y
+ CONFIG_LEDS_TRIGGER_BACKLIGHT=y
+ CONFIG_LEDS_TRIGGER_CPU=y
+ CONFIG_LEDS_TRIGGER_GPIO=y
+diff -urN linux/drivers/leds/trigger/Kconfig oldLinux/drivers/leds/trigger/Kconfig
+--- linux/drivers/leds/trigger/Kconfig	2018-11-13 18:24:14.804154255 -0800
++++ oldLinux/drivers/leds/trigger/Kconfig	2018-11-13 18:21:19.352029111 -0800
+@@ -58,13 +58,6 @@
+ 	  load average.
+ 	  If unsure, say Y.
+ 
+-config LEDS_TRIGGER_MORSE
+-	tristate "LED Morse Trigger"
+-	depends on LEDS_TRIGGERS
+-	default y
+-	help
+-	  This makes a predefined morse code message blink
+-
+ config LEDS_TRIGGER_BACKLIGHT
+ 	tristate "LED backlight Trigger"
+ 	depends on LEDS_TRIGGERS
+diff -urN linux/drivers/leds/trigger/ledtrig-morse.c oldLinux/drivers/leds/trigger/ledtrig-morse.c
+--- linux/drivers/leds/trigger/ledtrig-morse.c	2018-11-26 23:37:14.377416318 -0800
++++ oldLinux/drivers/leds/trigger/ledtrig-morse.c	1969-12-31 16:00:00.000000000 -0800
+@@ -1,485 +0,0 @@
+-/*
+- * LED morse Trigger
+- *
+- * Copyright (C) 2006 Atsushi Nemoto <anemo@mba.ocn.ne.jp>
+- *
+- * Based on Richard Purdie's ledtrig-timer.c and some arch's
+- * CONFIG_morse code.
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+- *
+- */
+-#include <linux/module.h>
+-#include <linux/kernel.h>
+-#include <linux/init.h>
+-#include <linux/slab.h>
+-#include <linux/timer.h>
+-#include <linux/sched.h>
+-#include <linux/sched/loadavg.h>
+-#include <linux/leds.h>
+-#include <linux/reboot.h>
+-#include "../leds.h"
+-
+-#include <linux/cdev.h>
+-#include <linux/uaccess.h>
+-#include <linux/ctype.h>
+-
+-#define FIRST_MINOR 0
+-#define MINOR_CNT 1
+-
+-static dev_t dev;
+-static struct cdev c_dev;
+-static struct class *cl;
+-
+-static int panic_morses;
+-
+-struct morse_trig_data {
+-	unsigned int phase;
+-	unsigned int period;
+-	struct timer_list timer;
+-	unsigned int invert;
+-	unsigned int speed;
+-	unsigned int mode;
+-};
+-
+-int *delayMessage = NULL;
+-// adds delays for dots/dashes/spaces/character ending
+-void dot_delay( int idx){
+-	delayMessage[idx] = 500;
+-	idx++;
+-	delayMessage[idx] = 250;
+-}
+-
+-void dash_delay( int idx){
+-	delayMessage[idx] = 1500;
+-	idx++;
+-	delayMessage[idx] = 250;
+-}
+-
+-void space_delay( int idx){
+-	delayMessage[idx] = 3500;
+-}
+-
+-void char_delay( int idx){
+-	delayMessage[idx] = 1500;
+-}
+-
+-// Morse code alphabet
+-static char *alphabet[] = {
+-	".-",	// A .-
+-	"-...",	// B -...
+-	"-.-.",	// C -.-.
+-	"-..",	// D -..
+-	".",	// E .
+-	"..-.",	// F ..-.
+-	"--.",	// G --.
+-	"....",	// H ....
+-	"..",	// I ..
+-	".---",	// J .---
+-	"-.-",	// K -.-
+-	".-..",	// L .-..
+-	"--",	// M --
+-	"-.",	// N -.
+-	"---",	// O ---
+-	".--.",	// P .--.
+-	"--.-",	// Q --.-
+-	".-.",	// R .-.
+-	"...",	// S ...
+-	"-",	// T -
+-	"..-",	// U ..-
+-	"...-",	// V ...-
+-	".--",	// W .--
+-	"-..-",	// X -..-
+-	"-.--",	// Y -.--
+-	"--.."	// Z --..
+-};
+-int count = 0;
+-void convert(char *message){
+-	//printk("CS444 convert %s\r\n", message);
+-	// //printk("CS444 convert 1");
+-	// converts the message to lowercase
+-	int i = 0;	
+-	while(message[i] != '\0'){
+-		message[i] = tolower(message[i]);
+-		i++;
+-	}
+-	// //printk("CS444 convert 2");
+-	// converts the message into morse code dots and dashes (./-)
+-	char *morse_message[i];
+-	i = 0;
+-	int dec; // decimal integer value of ascii character
+-	while(message[i] != '\0'){
+-		dec = (int)message[i];
+-		if(dec == 32){
+-			morse_message[i] = " ";
+-		}
+-		else{
+-			dec -= 97;
+-			morse_message[i] = alphabet[dec];
+-		}
+-		i++;
+-	}
+-	//printk("CS444 convert 3");
+-	// counts how many delays will be needed for the message
+-	int len = i;	
+-	int j = 0;
+-	for(i = 0; i < len-1; i++){
+-		j = 0;
+-		while(morse_message[i][j] != '\0'){
+-			//printk(KERN_CONT "%c ", morse_message[i][j]);
+-			if(morse_message[i][j] == '.' || morse_message[i][j] == '-'){
+-				count += 2;
+-			}
+-			j++;
+-		}
+-		//printk("\n");
+-	}
+-	//printk("CS444 convert 4");
+-	// puts the delays into an array
+-	if (delayMessage != NULL){
+-		//printk("CS444 freeing delayMessage");
+-		kfree(delayMessage);
+-		delayMessage = NULL;
+-		//printk("CS444 delayMessage freed");
+-	}
+-	delayMessage = (int*)kmalloc(count*sizeof(int),GFP_KERNEL); 
+-	int idx = 0;
+-	for(i = 0; i < len-1; i++){
+-		j = 0;
+-		while(morse_message[i][j] != '\0'){
+-			if(morse_message[i][j] == '.'){
+-				dot_delay(idx);
+-				idx += 2;
+-			} 
+-			else if(morse_message[i][j] == '-'){
+-				dash_delay(idx);
+-				idx += 2;
+-			}
+-			else{
+-				space_delay(idx-1);
+-			}	
+-			j++;
+-		}
+-		if(strcmp(morse_message[i]," ") != 0){
+-			char_delay(idx-1);
+-		}
+-	}
+-	space_delay(idx-1);
+-	//printk("CS444 convert 5");
+-}
+-
+-static const int message[18] = {
+-	500,	250,	500,	250,	500,	1750, // S
+-	1500,	250,	1500,	250,	1500,	1750, // o
+-	500,	250,	500,	250,	500,	1750, // S
+-};
+-int onOff = 0;
+-int myIndex = 0;
+-unsigned int ranThrough = 0;
+-unsigned int writeReady = 0;
+-char *lcl_buf = NULL;
+-
+-static void led_morse_function(unsigned long data)
+-{
+-	// //printk("CS444 morse ready? %d",writeReady);
+-	struct led_classdev *led_cdev = (struct led_classdev *) data;
+-	struct morse_trig_data *morse_data = led_cdev->trigger_data;
+-	unsigned long brightness = LED_OFF;
+-	unsigned long delay = 0;
+-	if (unlikely(panic_morses)) {
+-		led_set_brightness_nosleep(led_cdev, LED_OFF);
+-		return;
+-	}
+-
+-	if (test_and_clear_bit(LED_BLINK_BRIGHTNESS_CHANGE, &led_cdev->work_flags))
+-		led_cdev->blink_brightness = led_cdev->new_blink_brightness;
+-
+-	if (writeReady == 1){
+-		//printk("CS444 morse writing %d",myIndex);
+-			// if previous was off, new one is on
+-		if (onOff == 0){
+-			onOff = 1;
+-		}
+-		else{
+-			onOff = 0;
+-		}
+-		brightness = onOff;
+-		// wrap around message if in repeat mode
+-		if (myIndex >= count){
+-			myIndex = 0;
+-			ranThrough = 1;
+-		}
+-		// if not in repeat mode and at end of message, turn off
+-		if (morse_data->mode == 1 && ranThrough == 1){
+-			brightness = LED_OFF;
+-		}
+-		if (morse_data->mode == 0){
+-			ranThrough = 0;
+-		}
+-
+-		delay = msecs_to_jiffies(delayMessage[myIndex]);
+-		// if speed is selected, multiply delay by two to make morse print slower
+-		if (morse_data->speed > 0){
+-			// brightness = LED_OFF;
+-			delay = msecs_to_jiffies(delayMessage[myIndex]/morse_data->speed);
+-		}
+-		// otherwise normal speed
+-		
+-		myIndex++;
+-	}
+-
+-	led_set_brightness_nosleep(led_cdev, brightness);
+-	mod_timer(&morse_data->timer, jiffies + delay);
+-}
+-
+-static ssize_t led_speed_show(struct device *dev,
+-		struct device_attribute *attr, char *buf)
+-{
+-	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+-	struct morse_trig_data *morse_data = led_cdev->trigger_data;
+-
+-	return sprintf(buf, "%u\n", morse_data->speed);
+-}
+-
+-static ssize_t led_speed_store(struct device *dev,
+-		struct device_attribute *attr, const char *buf, size_t size)
+-{
+-	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+-	struct morse_trig_data *morse_data = led_cdev->trigger_data;
+-	unsigned long state;
+-	int ret;
+-
+-	ret = kstrtoul(buf, 0, &state);
+-	if (ret)
+-		return ret;
+-
+-	morse_data->speed = state;
+-
+-	return size;
+-}
+-static ssize_t led_mode_show(struct device *dev,
+-		struct device_attribute *attr, char *buf)
+-{
+-	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+-	struct morse_trig_data *morse_data = led_cdev->trigger_data;
+-
+-	return sprintf(buf, "%u\n", morse_data->mode);
+-}
+-
+-static ssize_t led_mode_store(struct device *dev,
+-		struct device_attribute *attr, const char *buf, size_t size)
+-{
+-	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+-	struct morse_trig_data *morse_data = led_cdev->trigger_data;
+-	unsigned long state;
+-	int ret;
+-
+-	ret = kstrtoul(buf, 0, &state);
+-	if (ret)
+-		return ret;
+-
+-	morse_data->mode = !!state;
+-
+-	return size;
+-}
+-static ssize_t led_invert_show(struct device *dev,
+-		struct device_attribute *attr, char *buf)
+-{
+-	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+-	struct morse_trig_data *morse_data = led_cdev->trigger_data;
+-
+-	return sprintf(buf, "%u\n", morse_data->invert);
+-}
+-
+-static ssize_t led_invert_store(struct device *dev,
+-		struct device_attribute *attr, const char *buf, size_t size)
+-{
+-	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+-	struct morse_trig_data *morse_data = led_cdev->trigger_data;
+-	unsigned long state;
+-	int ret;
+-
+-	ret = kstrtoul(buf, 0, &state);
+-	if (ret)
+-		return ret;
+-
+-	morse_data->invert = !!state;
+-
+-	return size;
+-}
+-
+-static int my_open(struct inode *i, struct file *f)
+-{
+-    //printk("CS444 Dummy driver open\r\n");
+-    return 0;
+-}
+-static int my_close(struct inode *i, struct file *f)
+-{
+-    //printk("CS444 Dummy driver close\r\n");
+-    return 0;
+-}
+-
+-static ssize_t dummy_read(struct file *file, char __user *buf, size_t size, loff_t *ppos)
+-{
+-    //printk("CS444 Dummy driver read\r\n");
+-    snprintf(buf, size, "Hey there, I'm a dummy!\r\n");
+-    return strlen(buf);
+-}
+-
+-static ssize_t dummy_write(struct file *file, const char __user *buf, size_t size, loff_t *ppos)
+-{
+-	// allocate local buffer the size of the one being passed in
+-	if (lcl_buf != NULL){
+-		kfree(lcl_buf);
+-		lcl_buf = NULL;
+-	}
+-    lcl_buf = (char *)kmalloc(strlen(buf)*sizeof(char)+1,GFP_KERNEL);
+-	// //printk("CS444 dummy write 1"); 
+-    
+-	memset(lcl_buf, 0, sizeof(strlen(buf)*sizeof(char)+1));
+-	// //printk("CS444 dummy write 2"); 
+-    
+-	if (copy_from_user(lcl_buf, buf, size))
+-	{
+-		return -EACCES;
+-	}
+-	//printk("CS444 dummy write 3"); 
+-	writeReady = 0;
+-	convert(lcl_buf);
+-	myIndex = 0;
+-	writeReady = 1;
+-
+-	//printk("CS444 dummy write 4"); 
+-    // //printk("CS444 Dummy driver write %ld bytes: %s\r\n", size, lcl_buf);
+-
+-    return size;
+-}
+-
+-static struct file_operations dummy_fops =
+-{
+-    .owner = THIS_MODULE,
+-    .open = my_open,
+-    .read = dummy_read,
+-    .write = dummy_write,
+-    .release = my_close
+-};
+-
+-static DEVICE_ATTR(invert, 0644, led_invert_show, led_invert_store);
+-static DEVICE_ATTR(speed, 0644, led_speed_show, led_speed_store);
+-static DEVICE_ATTR(mode, 0644, led_mode_show, led_mode_store);
+-
+-static void morse_trig_activate(struct led_classdev *led_cdev)
+-{
+-	// creating character device start		
+-	alloc_chrdev_region(&dev, 0, 1, "cs444_dummy");
+-
+-	cdev_init(&c_dev, &dummy_fops);
+-	cdev_add(&c_dev, dev, MINOR_CNT);
+-
+-	cl = class_create(THIS_MODULE,"char");
+-	device_create(cl,NULL,dev,NULL,"morse");
+-	//printk("CS444 Dummy Driver has been loaded!\r\n");
+-	// create character device end
+-
+-	struct morse_trig_data *morse_data;
+-	int rc;
+-
+-	morse_data = kmalloc(sizeof(*morse_data), GFP_KERNEL);
+-	if (!morse_data)
+-		return;
+-
+-	led_cdev->trigger_data = morse_data;
+-	rc = device_create_file(led_cdev->dev, &dev_attr_invert);
+-	device_create_file(led_cdev->dev, &dev_attr_speed);
+-	device_create_file(led_cdev->dev, &dev_attr_mode);
+-	if (rc) {
+-		kfree(led_cdev->trigger_data);
+-		return;
+-	}
+-
+-	setup_timer(&morse_data->timer,
+-		    led_morse_function, (unsigned long) led_cdev);
+-	morse_data->phase = 0;
+-	if (!led_cdev->blink_brightness)
+-		led_cdev->blink_brightness = led_cdev->max_brightness;
+-	led_morse_function(morse_data->timer.data);
+-	set_bit(LED_BLINK_SW, &led_cdev->work_flags);
+-	led_cdev->activated = true;
+-}
+-
+-static void morse_trig_deactivate(struct led_classdev *led_cdev)
+-{
+-	// destroy character device start
+-	device_destroy(cl, dev);
+-    class_destroy(cl);
+-    cdev_del(&c_dev);
+-    unregister_chrdev_region(dev, MINOR_CNT);
+-	// destroy character device end
+-
+-	struct morse_trig_data *morse_data = led_cdev->trigger_data;
+-
+-	if (led_cdev->activated) {
+-		del_timer_sync(&morse_data->timer);
+-		device_remove_file(led_cdev->dev, &dev_attr_invert);
+-		kfree(morse_data);
+-		clear_bit(LED_BLINK_SW, &led_cdev->work_flags);
+-		led_cdev->activated = false;
+-	}
+-}
+-
+-static struct led_trigger morse_led_trigger = {
+-	.name     = "morse",
+-	.activate = morse_trig_activate,
+-	.deactivate = morse_trig_deactivate,
+-};
+-
+-static int morse_reboot_notifier(struct notifier_block *nb,
+-				     unsigned long code, void *unused)
+-{
+-	led_trigger_unregister(&morse_led_trigger);
+-	return NOTIFY_DONE;
+-}
+-
+-static int morse_panic_notifier(struct notifier_block *nb,
+-				     unsigned long code, void *unused)
+-{
+-	panic_morses = 1;
+-	return NOTIFY_DONE;
+-}
+-
+-static struct notifier_block morse_reboot_nb = {
+-	.notifier_call = morse_reboot_notifier,
+-};
+-
+-static struct notifier_block morse_panic_nb = {
+-	.notifier_call = morse_panic_notifier,
+-};
+-
+-static int __init morse_trig_init(void)
+-{
+-	int rc = led_trigger_register(&morse_led_trigger);
+-
+-	if (!rc) {
+-		atomic_notifier_chain_register(&panic_notifier_list,
+-					       &morse_panic_nb);
+-		register_reboot_notifier(&morse_reboot_nb);
+-	}
+-	return rc;
+-}
+-
+-static void __exit morse_trig_exit(void)
+-{
+-	unregister_reboot_notifier(&morse_reboot_nb);
+-	atomic_notifier_chain_unregister(&panic_notifier_list,
+-					 &morse_panic_nb);
+-	led_trigger_unregister(&morse_led_trigger);
+-}
+-
+-module_init(morse_trig_init);
+-module_exit(morse_trig_exit);
+-
+-MODULE_AUTHOR("Aidan Grimshaw <grimshaa@oregonstate.edu>");
+-MODULE_DESCRIPTION("Morse Code");
+-MODULE_LICENSE("GPL");
+diff -urN linux/drivers/leds/trigger/Makefile oldLinux/drivers/leds/trigger/Makefile
+--- linux/drivers/leds/trigger/Makefile	2018-11-13 18:24:14.804154255 -0800
++++ oldLinux/drivers/leds/trigger/Makefile	2018-11-13 18:21:19.352029111 -0800
+@@ -12,4 +12,3 @@
+ obj-$(CONFIG_LEDS_TRIGGER_CAMERA)	+= ledtrig-camera.o
+ obj-$(CONFIG_LEDS_TRIGGER_INPUT)	+= ledtrig-input.o
+ obj-$(CONFIG_LEDS_TRIGGER_PANIC)	+= ledtrig-panic.o
+-obj-$(CONFIG_LEDS_TRIGGER_MORSE)	+= ledtrig-morse.o
+\ No newline at end of file
+diff -urN linux/.git/COMMIT_EDITMSG oldLinux/.git/COMMIT_EDITMSG
+--- linux/.git/COMMIT_EDITMSG	2018-11-26 23:49:13.496235275 -0800
++++ oldLinux/.git/COMMIT_EDITMSG	2018-11-13 14:06:22.002786346 -0800
+@@ -1 +1 @@
+-final commit
++got boolean speed working
+diff -urN linux/.git/HEAD oldLinux/.git/HEAD
+--- linux/.git/HEAD	2018-11-13 18:24:14.988154402 -0800
++++ oldLinux/.git/HEAD	2018-11-13 18:21:19.532029220 -0800
+@@ -1 +1 @@
+-ref: refs/heads/aidanBranch
++ref: refs/heads/rpi-4.14.y
+Binary files linux/.git/index and oldLinux/.git/index differ
+diff -urN linux/.git/logs/HEAD oldLinux/.git/logs/HEAD
+--- linux/.git/logs/HEAD	2018-11-26 23:49:13.500235255 -0800
++++ oldLinux/.git/logs/HEAD	2018-11-13 18:21:19.532029220 -0800
+@@ -8,12 +8,3 @@
+ 41493ebfb50d2e44ad9f5f7c3940e1f5a1af877b e84e16292ae8ba455a8001d95e17fcc70fae489b aidan <grimshawaidan@gmail.com> 1542143472 -0800	commit: added speed sysfs file
+ e84e16292ae8ba455a8001d95e17fcc70fae489b b85fae9f8d8f05fdbc6ecf0f00da6bf98bb4464a aidan <grimshawaidan@gmail.com> 1542146782 -0800	commit: got boolean speed working
+ b85fae9f8d8f05fdbc6ecf0f00da6bf98bb4464a 36612d5d7a88672a3e7dd6cb458dbbbca0d75efe aidan <grimshawaidan@gmail.com> 1542162079 -0800	checkout: moving from aidanBranch to rpi-4.14.y
+-36612d5d7a88672a3e7dd6cb458dbbbca0d75efe b85fae9f8d8f05fdbc6ecf0f00da6bf98bb4464a aidan <grimshawaidan@gmail.com> 1542162254 -0800	checkout: moving from rpi-4.14.y to aidanBranch
+-b85fae9f8d8f05fdbc6ecf0f00da6bf98bb4464a 549a6dfa1909dad35141d2d1b5a60fd9c9f39b6a aidan <grimshawaidan@gmail.com> 1542924321 -0800	commit: fixed minor issues with the morse code
+-549a6dfa1909dad35141d2d1b5a60fd9c9f39b6a 1d8e1f1f0fff177f8ce29c10406a52d9a1feecb3 aidan <grimshawaidan@gmail.com> 1543194529 -0800	commit: got basic character device working
+-1d8e1f1f0fff177f8ce29c10406a52d9a1feecb3 7df8481572e844c31241a56cd2288d6b17723df8 aidan <grimshawaidan@gmail.com> 1543210779 -0800	commit: almost done with implementation
+-7df8481572e844c31241a56cd2288d6b17723df8 9181c608f7af6f246c44891b0f31ae499bae2c1d aidan <grimshawaidan@gmail.com> 1543261881 -0800	commit: code NULL pointer dereference
+-9181c608f7af6f246c44891b0f31ae499bae2c1d 104ec0effd6ac53743c04b19433271cb3da3b089 aidan <grimshawaidan@gmail.com> 1543280890 -0800	commit: works fine initaially, fails on the second try
+-104ec0effd6ac53743c04b19433271cb3da3b089 20a90954f270808e66a411926a19a9e9e520c554 aidan <grimshawaidan@gmail.com> 1543294285 -0800	commit: some changes, not sure what
+-20a90954f270808e66a411926a19a9e9e520c554 a3e146790496c5b7b57cdfcc263fa30d95f6d879 aidan <grimshawaidan@gmail.com> 1543299778 -0800	commit: removed dummy files, added print to ledtrig
+-a3e146790496c5b7b57cdfcc263fa30d95f6d879 14516164ef960cd0419a45a3c71f1d9cf4203e57 aidan <grimshawaidan@gmail.com> 1543304953 -0800	commit: final commit
+diff -urN linux/.git/logs/refs/heads/aidanBranch oldLinux/.git/logs/refs/heads/aidanBranch
+--- linux/.git/logs/refs/heads/aidanBranch	2018-11-26 23:49:13.500235255 -0800
++++ oldLinux/.git/logs/refs/heads/aidanBranch	2018-11-13 14:06:22.014786347 -0800
+@@ -6,11 +6,3 @@
+ 645fd9b0c0b3c1f79f71f92dac79bd2f87010444 41493ebfb50d2e44ad9f5f7c3940e1f5a1af877b aidan <grimshawaidan@gmail.com> 1542139431 -0800	reset: moving to origin/aidanBranch
+ 41493ebfb50d2e44ad9f5f7c3940e1f5a1af877b e84e16292ae8ba455a8001d95e17fcc70fae489b aidan <grimshawaidan@gmail.com> 1542143472 -0800	commit: added speed sysfs file
+ e84e16292ae8ba455a8001d95e17fcc70fae489b b85fae9f8d8f05fdbc6ecf0f00da6bf98bb4464a aidan <grimshawaidan@gmail.com> 1542146782 -0800	commit: got boolean speed working
+-b85fae9f8d8f05fdbc6ecf0f00da6bf98bb4464a 549a6dfa1909dad35141d2d1b5a60fd9c9f39b6a aidan <grimshawaidan@gmail.com> 1542924321 -0800	commit: fixed minor issues with the morse code
+-549a6dfa1909dad35141d2d1b5a60fd9c9f39b6a 1d8e1f1f0fff177f8ce29c10406a52d9a1feecb3 aidan <grimshawaidan@gmail.com> 1543194529 -0800	commit: got basic character device working
+-1d8e1f1f0fff177f8ce29c10406a52d9a1feecb3 7df8481572e844c31241a56cd2288d6b17723df8 aidan <grimshawaidan@gmail.com> 1543210779 -0800	commit: almost done with implementation
+-7df8481572e844c31241a56cd2288d6b17723df8 9181c608f7af6f246c44891b0f31ae499bae2c1d aidan <grimshawaidan@gmail.com> 1543261881 -0800	commit: code NULL pointer dereference
+-9181c608f7af6f246c44891b0f31ae499bae2c1d 104ec0effd6ac53743c04b19433271cb3da3b089 aidan <grimshawaidan@gmail.com> 1543280890 -0800	commit: works fine initaially, fails on the second try
+-104ec0effd6ac53743c04b19433271cb3da3b089 20a90954f270808e66a411926a19a9e9e520c554 aidan <grimshawaidan@gmail.com> 1543294285 -0800	commit: some changes, not sure what
+-20a90954f270808e66a411926a19a9e9e520c554 a3e146790496c5b7b57cdfcc263fa30d95f6d879 aidan <grimshawaidan@gmail.com> 1543299778 -0800	commit: removed dummy files, added print to ledtrig
+-a3e146790496c5b7b57cdfcc263fa30d95f6d879 14516164ef960cd0419a45a3c71f1d9cf4203e57 aidan <grimshawaidan@gmail.com> 1543304953 -0800	commit: final commit
+diff -urN linux/.git/logs/refs/remotes/origin/aidanBranch oldLinux/.git/logs/refs/remotes/origin/aidanBranch
+--- linux/.git/logs/refs/remotes/origin/aidanBranch	2018-11-26 23:49:39.192108302 -0800
++++ oldLinux/.git/logs/refs/remotes/origin/aidanBranch	2018-11-13 14:06:35.682787011 -0800
+@@ -2,11 +2,3 @@
+ 64045af22ce9b9046f18ba1b845232b813beeb1a 8825d5bf9c39f486adf83215862a6a464d1a10f6 aidan <grimshawaidan@gmail.com> 1542077463 -0800	update by push
+ 8825d5bf9c39f486adf83215862a6a464d1a10f6 41493ebfb50d2e44ad9f5f7c3940e1f5a1af877b aidan <grimshawaidan@gmail.com> 1542082695 -0800	update by push
+ 41493ebfb50d2e44ad9f5f7c3940e1f5a1af877b b85fae9f8d8f05fdbc6ecf0f00da6bf98bb4464a aidan <grimshawaidan@gmail.com> 1542146795 -0800	update by push
+-b85fae9f8d8f05fdbc6ecf0f00da6bf98bb4464a 549a6dfa1909dad35141d2d1b5a60fd9c9f39b6a aidan <grimshawaidan@gmail.com> 1542924348 -0800	update by push
+-549a6dfa1909dad35141d2d1b5a60fd9c9f39b6a 1d8e1f1f0fff177f8ce29c10406a52d9a1feecb3 aidan <grimshawaidan@gmail.com> 1543194570 -0800	update by push
+-1d8e1f1f0fff177f8ce29c10406a52d9a1feecb3 7df8481572e844c31241a56cd2288d6b17723df8 aidan <grimshawaidan@gmail.com> 1543210806 -0800	update by push
+-7df8481572e844c31241a56cd2288d6b17723df8 9181c608f7af6f246c44891b0f31ae499bae2c1d aidan <grimshawaidan@gmail.com> 1543261920 -0800	update by push
+-9181c608f7af6f246c44891b0f31ae499bae2c1d 104ec0effd6ac53743c04b19433271cb3da3b089 aidan <grimshawaidan@gmail.com> 1543280916 -0800	update by push
+-104ec0effd6ac53743c04b19433271cb3da3b089 20a90954f270808e66a411926a19a9e9e520c554 aidan <grimshawaidan@gmail.com> 1543294311 -0800	update by push
+-20a90954f270808e66a411926a19a9e9e520c554 a3e146790496c5b7b57cdfcc263fa30d95f6d879 aidan <grimshawaidan@gmail.com> 1543299837 -0800	update by push
+-a3e146790496c5b7b57cdfcc263fa30d95f6d879 14516164ef960cd0419a45a3c71f1d9cf4203e57 aidan <grimshawaidan@gmail.com> 1543304979 -0800	update by push
+Binary files linux/.git/objects/00/bc32023b5c7589f98bbbc9e43ae610f1b9c4c2 and oldLinux/.git/objects/00/bc32023b5c7589f98bbbc9e43ae610f1b9c4c2 differ
+Binary files linux/.git/objects/05/270b4028a297624f9dff6b24ea28e3c524fd23 and oldLinux/.git/objects/05/270b4028a297624f9dff6b24ea28e3c524fd23 differ
+Binary files linux/.git/objects/09/1b0d69f425f4460af3b7c873d778ddb3e26a81 and oldLinux/.git/objects/09/1b0d69f425f4460af3b7c873d778ddb3e26a81 differ
+Binary files linux/.git/objects/09/8684a0131e0fc14ebc6569f166c07ee14a4e4b and oldLinux/.git/objects/09/8684a0131e0fc14ebc6569f166c07ee14a4e4b differ
+Binary files linux/.git/objects/0a/8449455bb7b5c7bbd4ea399bc697ef07cdb131 and oldLinux/.git/objects/0a/8449455bb7b5c7bbd4ea399bc697ef07cdb131 differ
+Binary files linux/.git/objects/10/2ae1d49e6e67f9261bfc175878198b492b4231 and oldLinux/.git/objects/10/2ae1d49e6e67f9261bfc175878198b492b4231 differ
+Binary files linux/.git/objects/10/4ec0effd6ac53743c04b19433271cb3da3b089 and oldLinux/.git/objects/10/4ec0effd6ac53743c04b19433271cb3da3b089 differ
+diff -urN linux/.git/objects/14/516164ef960cd0419a45a3c71f1d9cf4203e57 oldLinux/.git/objects/14/516164ef960cd0419a45a3c71f1d9cf4203e57
+--- linux/.git/objects/14/516164ef960cd0419a45a3c71f1d9cf4203e57	2018-11-26 23:49:13.500235255 -0800
++++ oldLinux/.git/objects/14/516164ef960cd0419a45a3c71f1d9cf4203e57	1969-12-31 16:00:00.000000000 -0800
+@@ -1 +0,0 @@
+-xùéQ¬ ˝Ê\@CYv)â1^eKKRZÉØo£7ÛM2ì˜ZK◊÷¬©7ÄNñ" 0c@í$òåH2úFJÍ¡M∂Ædp‰ÉqÅ"N~BSé—dìfJ£ä_}ŸõÊíx”◊πï˙\¯˝ù˜πrY/qØ7=†8b˙lFc‘AèÉ]˛PU.Ø˙WP_0GC
+\ No newline at end of file
+diff -urN linux/.git/objects/1d/8e1f1f0fff177f8ce29c10406a52d9a1feecb3 oldLinux/.git/objects/1d/8e1f1f0fff177f8ce29c10406a52d9a1feecb3
+--- linux/.git/objects/1d/8e1f1f0fff177f8ce29c10406a52d9a1feecb3	2018-11-25 17:08:49.912200028 -0800
++++ oldLinux/.git/objects/1d/8e1f1f0fff177f8ce29c10406a52d9a1feecb3	1969-12-31 16:00:00.000000000 -0800
+@@ -1 +0,0 @@
+-xùé[N√0D˘ˆ*ÓäÏ¯ë^	!∂rvbÅ„ 5Ìˆ	,ÅœÈÃÈ≠’	Kà/s‰EWAÁ1±e	9)]ùÁïK º∫‰ΩΩ⁄®ÊF#b@JZ»°E%ı—ßã:éîlQ,9ë°Ôπ˜Tïx€Fm˜ùûÒckTø^•∑wp1xá!.óSdÕŸûg˛j∂>ÅÈ^dßAÚª¢˘Q%√≥èœzlÊZP
+\ No newline at end of file
+Binary files linux/.git/objects/1f/afd7917955af792cac0e33ec3907f6f02e1895 and oldLinux/.git/objects/1f/afd7917955af792cac0e33ec3907f6f02e1895 differ
+Binary files linux/.git/objects/20/a90954f270808e66a411926a19a9e9e520c554 and oldLinux/.git/objects/20/a90954f270808e66a411926a19a9e9e520c554 differ
+Binary files linux/.git/objects/22/d68f7f65168ee74d43a05058b5f7ad55202265 and oldLinux/.git/objects/22/d68f7f65168ee74d43a05058b5f7ad55202265 differ
+Binary files linux/.git/objects/3d/956ca7184b0e77bc6a96f2e7645bc8c06d6b63 and oldLinux/.git/objects/3d/956ca7184b0e77bc6a96f2e7645bc8c06d6b63 differ
+Binary files linux/.git/objects/44/5e125f9dc3c3a132bdc2536061abe4f0032d44 and oldLinux/.git/objects/44/5e125f9dc3c3a132bdc2536061abe4f0032d44 differ
+Binary files linux/.git/objects/4b/93d17a9e5d03926bd3b4e7a1443baf053629d9 and oldLinux/.git/objects/4b/93d17a9e5d03926bd3b4e7a1443baf053629d9 differ
+diff -urN linux/.git/objects/54/9a6dfa1909dad35141d2d1b5a60fd9c9f39b6a oldLinux/.git/objects/54/9a6dfa1909dad35141d2d1b5a60fd9c9f39b6a
+--- linux/.git/objects/54/9a6dfa1909dad35141d2d1b5a60fd9c9f39b6a	2018-11-22 14:05:21.918871286 -0800
++++ oldLinux/.git/objects/54/9a6dfa1909dad35141d2d1b5a60fd9c9f39b6a	1969-12-31 16:00:00.000000000 -0800
+@@ -1,2 +0,0 @@
+-xùéQn!ÛÕ)|ÅV^ÇYVä™^≈ÄùE
+-KDÈÒªÍ˙˘FÕK≠÷2¡∫Ì2ªXõ}–U=->à¨.ª+#!ÖH∫r&≤h≠'Û‰.«ÑHY69(íÊòº$EEÃÏ£n!FÁºc√Øπ∑\2pª˜R«ŒÔø˘}Ø\ü©’/X»ŸÕ∫´]‡¢9Èyp ?T£ÂG2‘rú·2∆KºÀ‹aÓµı!êZÛ`:QB
+\ No newline at end of file
+Binary files linux/.git/objects/57/1a18c60deddd43e599965397ff9088fcea5bca and oldLinux/.git/objects/57/1a18c60deddd43e599965397ff9088fcea5bca differ
+Binary files linux/.git/objects/57/d83548ae70bface1ac29b0d2966730c66f2a25 and oldLinux/.git/objects/57/d83548ae70bface1ac29b0d2966730c66f2a25 differ
+Binary files linux/.git/objects/57/d8f33d514ab0537db97f1f64bf892cf1cbefc9 and oldLinux/.git/objects/57/d8f33d514ab0537db97f1f64bf892cf1cbefc9 differ
+Binary files linux/.git/objects/5c/bb1ae3b84855e2c40792d1f756e451326e1dff and oldLinux/.git/objects/5c/bb1ae3b84855e2c40792d1f756e451326e1dff differ
+Binary files linux/.git/objects/5f/fb08bcea45a15e377833d494d4a638d29401e8 and oldLinux/.git/objects/5f/fb08bcea45a15e377833d494d4a638d29401e8 differ
+Binary files linux/.git/objects/6e/7c718c4b15b0c46cfd3e004d36f48776b10eef and oldLinux/.git/objects/6e/7c718c4b15b0c46cfd3e004d36f48776b10eef differ
+Binary files linux/.git/objects/70/fb9e9a0d1e34571f2a3803742c6db92254a5df and oldLinux/.git/objects/70/fb9e9a0d1e34571f2a3803742c6db92254a5df differ
+Binary files linux/.git/objects/72/bd7f65ab5279fef7f0b1e71dbbaf46d894ebfa and oldLinux/.git/objects/72/bd7f65ab5279fef7f0b1e71dbbaf46d894ebfa differ
+Binary files linux/.git/objects/7c/144a36f1132110f0f02e130caa7a0b3f4e89a8 and oldLinux/.git/objects/7c/144a36f1132110f0f02e130caa7a0b3f4e89a8 differ
+Binary files linux/.git/objects/7d/f8481572e844c31241a56cd2288d6b17723df8 and oldLinux/.git/objects/7d/f8481572e844c31241a56cd2288d6b17723df8 differ
+Binary files linux/.git/objects/80/1d00f45201af5b6449afc890d2e1e5e16d8a6e and oldLinux/.git/objects/80/1d00f45201af5b6449afc890d2e1e5e16d8a6e differ
+Binary files linux/.git/objects/8a/8e25617c7fef43417da3fd85e72f6cc222d953 and oldLinux/.git/objects/8a/8e25617c7fef43417da3fd85e72f6cc222d953 differ
+Binary files linux/.git/objects/8f/01be33d2af466a7a10db8911d60a2f53551c6e and oldLinux/.git/objects/8f/01be33d2af466a7a10db8911d60a2f53551c6e differ
+diff -urN linux/.git/objects/91/81c608f7af6f246c44891b0f31ae499bae2c1d oldLinux/.git/objects/91/81c608f7af6f246c44891b0f31ae499bae2c1d
+--- linux/.git/objects/91/81c608f7af6f246c44891b0f31ae499bae2c1d	2018-11-26 11:51:21.844115139 -0800
++++ oldLinux/.git/objects/91/81c608f7af6f246c44891b0f31ae499bae2c1d	1969-12-31 16:00:00.000000000 -0800
+@@ -1 +0,0 @@
+-xùéQN1D˘ﬁS¯E±◊I\	!PÒ«ºâ”F"ªUH≈ı	Åè˘ò—º—§£µ:Äÿ=çnö)»ô]\U<ïçƒ‹b·ÄÏ9πx6ŸÇÍr◊n˚Äòã∞†èd¬úV$Fı!e"ë6åë÷ŸYÙ1nG≠Ywxπˆ⁄æn˙˝gﬂÆMÎÁs:⁄+†Áïä úú8∑Ãtˆt≤Ÿ‡˝„rÅ˚Q˜ﬂçl› ‘ûl˘d»K˘
+\ No newline at end of file
+Binary files linux/.git/objects/93/a45b26455353aa595ae6ede5d0016efa1ad86d and oldLinux/.git/objects/93/a45b26455353aa595ae6ede5d0016efa1ad86d differ
+Binary files linux/.git/objects/96/99828914ffe7824e9fac8f54f529c877671afb and oldLinux/.git/objects/96/99828914ffe7824e9fac8f54f529c877671afb differ
+Binary files linux/.git/objects/a0/51ef85572e11dab7c382c4ef7d6eb180083162 and oldLinux/.git/objects/a0/51ef85572e11dab7c382c4ef7d6eb180083162 differ
+diff -urN linux/.git/objects/a3/e146790496c5b7b57cdfcc263fa30d95f6d879 oldLinux/.git/objects/a3/e146790496c5b7b57cdfcc263fa30d95f6d879
+--- linux/.git/objects/a3/e146790496c5b7b57cdfcc263fa30d95f6d879	2018-11-26 22:22:58.654497262 -0800
++++ oldLinux/.git/objects/a3/e146790496c5b7b57cdfcc263fa30d95f6d879	1969-12-31 16:00:00.000000000 -0800
+@@ -1 +0,0 @@
+-xùéaj!FÛ€SÃö†Æ≥Î@(Ω ‡åaç¡òñﬁæ“#‰Á˜‡}º‘j-<Ü”Ë™ fóñ#/~K6ã'Aåe ﬁ⁄$x5Ózü¢e≤Ñ!˚ÕFu]98G~eGLJäﬁ&ƒ`¯5n≠·;\˜^ÍÛ∆?ˇÛkØ\éKjıÜ≈m[ÑÛ<¥f“8Ù’t≠Ì[‰UÎ/‰rËÛXd¢G/≥~48TF/ª˘∫ÕQC
+\ No newline at end of file
+Binary files linux/.git/objects/a8/3985effeb4bf0ff2fde11f23ab782fe3f63839 and oldLinux/.git/objects/a8/3985effeb4bf0ff2fde11f23ab782fe3f63839 differ
+Binary files linux/.git/objects/a8/68b8c84f729aeb44b32502371f8cbeeeba9279 and oldLinux/.git/objects/a8/68b8c84f729aeb44b32502371f8cbeeeba9279 differ
+Binary files linux/.git/objects/a8/7068b86089db85d27007f314e0b132e44f3811 and oldLinux/.git/objects/a8/7068b86089db85d27007f314e0b132e44f3811 differ
+Binary files linux/.git/objects/ac/2036c390af854947d14cc1d3dceea467d40d80 and oldLinux/.git/objects/ac/2036c390af854947d14cc1d3dceea467d40d80 differ
+Binary files linux/.git/objects/ad/26894073a852fb285f1b7f461454c079e8b6aa and oldLinux/.git/objects/ad/26894073a852fb285f1b7f461454c079e8b6aa differ
+Binary files linux/.git/objects/ae/cbd6be48a76fc17ff9a1fc8afd53016d88f599 and oldLinux/.git/objects/ae/cbd6be48a76fc17ff9a1fc8afd53016d88f599 differ
+Binary files linux/.git/objects/b0/4721a2ba38412855ae51cef3952501255389f2 and oldLinux/.git/objects/b0/4721a2ba38412855ae51cef3952501255389f2 differ
+Binary files linux/.git/objects/c8/09174e409e37c27060a031d7658d7ccbc3acbc and oldLinux/.git/objects/c8/09174e409e37c27060a031d7658d7ccbc3acbc differ
+Binary files linux/.git/objects/c8/98b01a911d6e1d441c0fb85898f65d1cf2a764 and oldLinux/.git/objects/c8/98b01a911d6e1d441c0fb85898f65d1cf2a764 differ
+Binary files linux/.git/objects/d2/4814f0a7db2d600b03ab945f5224f6e01dc641 and oldLinux/.git/objects/d2/4814f0a7db2d600b03ab945f5224f6e01dc641 differ
+diff -urN linux/.git/objects/d3/5f1c3488a327c0fd29d558d849f9f200cd54a6 oldLinux/.git/objects/d3/5f1c3488a327c0fd29d558d849f9f200cd54a6
+--- linux/.git/objects/d3/5f1c3488a327c0fd29d558d849f9f200cd54a6	2018-11-26 22:22:58.590495905 -0800
++++ oldLinux/.git/objects/d3/5f1c3488a327c0fd29d558d849f9f200cd54a6	1969-12-31 16:00:00.000000000 -0800
+@@ -1 +0,0 @@
+-xMì{0\W«A$ö¶öl%Çn$máÆ«zTHl<v…Ñ•Ïê§ª◊≈µª˜Æªw°©xìvTêH©WäòÒJ∫û•h•4DÑ}ŸëÑƒ#∫”{ezf~}>Á{øsÜÈL+;;¿¥¥¸ƒ∆ÜnaÑ@ÜÑ◊¸xùfÙ¯√	Ì˜†'ΩwZÿ[^8LúïîPåõ#·(Ü√`†bL∫ÚQ∞9¶thÌµ>∏–˘fBGÑrñÅå›¶!Q]‚…Ák'∫hYçım©6ñ™A7GàπÏ]QÄƒã˜W9ä›y´˛˜{´Y¢∫ˇeQ+.kÍ§/Ûg:æTºÑ«È‹<4hÀRÌO,HA«¡•+±ï•s	!ëÂËLT%g6ér\}NÒπﬁÓ†üm∆tL}>]67ö‹ˇpÑ—≤•¯qÿ\(ˇÎ-¬wΩÃ¸î∆|0ˆgTMérâ‹1É‰XuÇ°`¬¬ÂBLíèØIOË¶≈;Öù{≠“Ü©(O°áÇ[ÔÈóÆÓ˜¨m"~ç‰©ŒzÍ[uıóN‘Ωd[⁄Ï |:„Nÿ’¨Qäó3◊€_U?à^˙gí!∑µ&dÆ’øÔQ&…ÂoiÜàaX≤Ω]7q~ßº +àÂˆÌDÛ£?é3€ãÍ[=™¢4¬x¸k%±Yıª,…ì	p(<_ö®MpåIBûŸ2ÿ sâÖbÅë@'µSëKc≥æICá≤ùG„Ü]H¡8!n±\¥°¡)p ˛Ìˆì‘¨ï¡«c•¯Mz˝ÌÜ_pô¥´ƒœfºm«„H!G¢a\ŒÆiﬂ˘ÉSz∆.∆z$w§‚»Ω\µy“Cp…9ÅÍÈ9,®íàånn~≤®À[°Ûä(Eî›8#ÿ^8ïaæ3…T+ÀÃÌ¿›"($ñá¬ÄΩí7Ãxü˜†YáeJ™”<ØmÓŒœ•~TÔΩiÙõÜA\≥)_—ıÖ•HiŸˆYMc¡˘EÕrZóìæ¡±<TDRå£∞XXMÊ•lﬁ„{tﬁÌ„ø Ìá]UÏlmÈ§·äI˝≈¡e´SÈU∂ßçµ⁄<+krπ:{» 1"ó0ù2‘_È3î\o¯,÷{ﬂÈT*E¢Í6¬)†GÄy’Œ=U∏œπ≥ñL^Ï—$3$|‘‹∏¢MÁz[“rﬂa¢y˝x—Û^¢0⁄{Èy∑¢ãiÕ7ºG_jdpH*H§b’∑=—r“9!”¸6k‘[Ø◊IÔXQq6e¸∑∫¯Ë0ŸÅ˛Yˆ6´ﬂÃ'v/\≠Œ°í„™wß∞“”3]m>tÊf2c:ö±—M)òøÀ´ß›m’4t'“´«î⁄ÔFìú¿0±¨èõ™=òÏH/π◊⁄Nãµ—SÇ‰rRûxﬁﬁ¡ÓìÏ´Í(t˚æÒÎ¡ˆ$çFp§]¥˛õuY¡ÀüõÌºﬁ˜Àk?ﬂQj¿
+\ No newline at end of file
+Binary files linux/.git/objects/dd/98aedb0473f15baf9d676632961b9fcb7f751b and oldLinux/.git/objects/dd/98aedb0473f15baf9d676632961b9fcb7f751b differ
+Binary files linux/.git/objects/e0/008465c9339913b7a06a8620c29237df0d23ba and oldLinux/.git/objects/e0/008465c9339913b7a06a8620c29237df0d23ba differ
+Binary files linux/.git/objects/e2/a430b1e85481b43e4f64c7d121cacd6870de1e and oldLinux/.git/objects/e2/a430b1e85481b43e4f64c7d121cacd6870de1e differ
+diff -urN linux/.git/objects/e5/362da883c7b6527a60378aad44fe46d49ca684 oldLinux/.git/objects/e5/362da883c7b6527a60378aad44fe46d49ca684
+--- linux/.git/objects/e5/362da883c7b6527a60378aad44fe46d49ca684	2018-11-25 21:39:39.073522624 -0800
++++ oldLinux/.git/objects/e5/362da883c7b6527a60378aad44fe46d49ca684	1969-12-31 16:00:00.000000000 -0800
+@@ -1,7 +0,0 @@
+-xMì{0\W«O<Ú“4’ÿJ›à∂C◊cÖ*âçeKñ≤CöÏ^◊ÓﬁªÓﬁïöä7iGâî“è°¥Î9î¢ïFC6BÑÜÈ√é$$—ùﬁ+”3Û˚ÎÛ9ﬂÛ¯ùC‡0Lg⁄9:¶≠ÌGˆˆtkÉ ¬–H$
+-∏&äÈ4”GÔ´∂O{Ü>ÓÀ˙°Ö≥ÈE¡ƒI©A	M¡∏5Öb8Øè…ñø%ä6∆î>Œ≠/◊ÜÊ;_œ@!A‡àHA¿rê’£ﬂ4,ÆKæ$˝l’´ãñ”Xﬂñno´tÎ(ÑàVàÄ¡≤$üø∑¬UÓ.X	∫◊WÕ◊˝/ãZqIW/s>,L0›ÒÖÚ<NÁ†°õñf©P:,^äØº:8õSÅN«Vrg(«›ˇ∏ÄÁÁ	8VLóÙQSÂ≥£©çè3⁄√7ï@.áƒΩA∞q˜ãÃOhÃ˚c∆÷‰©…s0H!Ö5WA 
+-T6nÁŒ§¯XÙDlÿºU‹i`ó1BE˘àà$‹z«ËÍ –>ü⁄&b˛∑æ¡6‘⁄4®´øpÃ∏ÓÂ«Œƒ~Wˆìi˜(¬±fïR|Ÿ<ø Mq˘ nÒü	ÜH“÷öî[ºZˇÆwπ4_∞©	≈p$"ÅAHŸ∂v˝‰πùä¢úPñ«7™ÊIF9Å\6«óÍ[Ω´ùcu"˘Ç+eÒ9åªl…ì	q(<
+-_T’f∫úIAû:08EÍ”âEÉª!Æ[é«,éÕ§Ãeﬂ]Hq#9„ÑxƒÛ–Ü◊ê¡ƒ7£9;,“s~RáQèó4©⁄Mú?Á1ióâ_¨¯⁄GH!G‚`\Óx®+UVßÙ¥øÀ?hæ4e“À&çHóûjûûÛ“˛*Ÿ†ÿÙÊ:ˇgõ∫º±e:øÑR‰@›ç3¬úDìY÷;S,∑ÊXyÏÔ-"!ÇBE∏qÀ#ú‡Yo⁄°»liuÜœïM!@Ô\Èl˙ı~¶øÎ'4[
+-î]ÔQXÅ¥ÌS5çEgt+h]ÆF∆G
+-P1I≈0é¬`c7Q¯•∫yO¿·9è[+∑ôª!ö8:8–I√ì!0J√ W&3´NòmmÛ©¨…ÁÈÌ!É$à\¿Ù — µˇpj}¢…”¬øΩ'“©©¶€|GdÄ‰[;˚DÈ9Î…Z¥xæ/\óÃêJ¡≥Qk≥Îmz◊⁄Rñ˙ÕâÊµ£%œ˙Hà¬hÔ£€4‹Räœg4ﬂ}°ìÃ%©\(ïI4ﬂ÷´3¸;)€˙6k‘œ∞œ’HIi.e¸∑∫¯Î19!A9Nˆ+_œ%wœü≠…£R‡™wß±23≥^n>¯ÈÕT∆TcΩõR0˛PTOy:l——WeVπòå©∑øcFr√$r∞6n©z¢#≥ÏN√+«≠¨ıû¢Á$W»qê¸ÿÁˆNøtoUG±«˜ç_›p"iÇ „¬°øYï¸ºÒŸôŒk˝øæ
+-¯HAr
+\ No newline at end of file
+Binary files linux/.git/objects/e9/c53fe7441ce4c9a876e6d563bcd48f69932e8e and oldLinux/.git/objects/e9/c53fe7441ce4c9a876e6d563bcd48f69932e8e differ
+Binary files linux/.git/objects/f2/a3030825907849c62a381afa6afb5fc85367c0 and oldLinux/.git/objects/f2/a3030825907849c62a381afa6afb5fc85367c0 differ
+Binary files linux/.git/objects/fd/7bcc91396b0bc4e6da813b7bf6eb716330805d and oldLinux/.git/objects/fd/7bcc91396b0bc4e6da813b7bf6eb716330805d differ
+diff -urN linux/.git/refs/heads/aidanBranch oldLinux/.git/refs/heads/aidanBranch
+--- linux/.git/refs/heads/aidanBranch	2018-11-26 23:49:13.500235255 -0800
++++ oldLinux/.git/refs/heads/aidanBranch	2018-11-13 14:06:22.006786346 -0800
+@@ -1 +1 @@
+-14516164ef960cd0419a45a3c71f1d9cf4203e57
++b85fae9f8d8f05fdbc6ecf0f00da6bf98bb4464a
+diff -urN linux/.git/refs/remotes/origin/aidanBranch oldLinux/.git/refs/remotes/origin/aidanBranch
+--- linux/.git/refs/remotes/origin/aidanBranch	2018-11-26 23:49:39.192108302 -0800
++++ oldLinux/.git/refs/remotes/origin/aidanBranch	2018-11-13 14:06:35.682787011 -0800
+@@ -1 +1 @@
+-14516164ef960cd0419a45a3c71f1d9cf4203e57
++b85fae9f8d8f05fdbc6ecf0f00da6bf98bb4464a
+diff -urN linux/include/generated/compile.h oldLinux/include/generated/compile.h
+--- linux/include/generated/compile.h	2018-11-26 23:37:33.221443126 -0800
++++ oldLinux/include/generated/compile.h	2018-11-13 14:02:49.358793249 -0800
+@@ -1,7 +1,7 @@
+-/* This file is auto generated, version 66 */
++/* This file is auto generated, version 24 */
+ /* SMP PREEMPT */
+ #define UTS_MACHINE "aarch64"
+-#define UTS_VERSION "#66 SMP PREEMPT Mon Nov 26 23:37:33 PST 2018"
++#define UTS_VERSION "#24 SMP PREEMPT Tue Nov 13 14:02:49 PST 2018"
+ #define LINUX_COMPILE_BY "aidan"
+ #define LINUX_COMPILE_HOST "aidan-computer"
+ #define LINUX_COMPILER "gcc version 7.3.0 (Ubuntu/Linaro 7.3.0-27ubuntu1~18.04)"
+diff -urN linux/.version oldLinux/.version
+--- linux/.version	2018-11-26 23:37:33.177443063 -0800
++++ oldLinux/.version	2018-11-13 14:02:49.314793254 -0800
+@@ -1 +1 @@
+-66
++24
+diff -urN linux/.vscode/settings.json oldLinux/.vscode/settings.json
+--- linux/.vscode/settings.json	2018-11-25 19:31:30.019870779 -0800
++++ oldLinux/.vscode/settings.json	1969-12-31 16:00:00.000000000 -0800
+@@ -1,6 +0,0 @@
+-{
+-    "files.associations": {
+-        "cdev.h": "c",
+-        "leds.h": "c"
+-    }
+-}
+\ No newline at end of file

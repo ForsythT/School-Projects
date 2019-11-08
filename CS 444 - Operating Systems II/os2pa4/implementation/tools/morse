@@ -1,0 +1,4 @@
+echo morse > /sys/class/leds/led0/trigger
+sudo chmod 777 /sys/class/leds/led0/speed
+sudo chmod 777 /sys/class/leds/led0/mode
+sudo chmod 777 /dev/morse
