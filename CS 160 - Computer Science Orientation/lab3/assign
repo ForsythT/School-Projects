@@ -1,0 +1,19 @@
+import turtle
+window = turtle.Screen()
+my_turtle = turtle.Turtle()
+for x in range(3):
+	turtle.right(120)
+	turtle.forward(100)
+turtle.forward(100)
+for x in range(4):
+	turtle.rt(90)
+	turtle.fd(100)
+turtle.fd(150)
+for x in range(6):
+	turtle.rt(60)
+	turtle.fd(100)
+turtle.fd(200)
+for x in range(8):
+	turtle.rt(45)
+	turtle.fd(100)
+window.mainloop()
