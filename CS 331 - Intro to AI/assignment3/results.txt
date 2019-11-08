@@ -1,0 +1,152 @@
+============================
+= Testing on training data =
+============================
+
+
+=============================
+= Incorrect Classifications =
+=============================
+incorrect ['will', 'be', 'back', 'again']: guessed class: 0, actual class: 1
+incorrect ['they', 'know', 'how', 'to', 'make', 'them', 'here']: guessed class: 0, actual class: 1
+incorrect ['just', 'as', 'good', 'as', 'when', 'i', 'had', 'it', 'more', 'than', 'a', 'year', 'ago']: guessed class: 0, actual class: 1
+incorrect ['i', 'would', 'definitely', 'recommend', 'the', 'wings', 'as', 'well', 'as', 'the', 'pizza']: guessed class: 0, actual class: 1
+incorrect ['i', 'did', 'not', 'expect', 'this', 'to', 'be', 'so', 'good']: guessed class: 0, actual class: 1
+incorrect ['the', 'only', 'downside', 'is', 'the', 'service']: guessed class: 1, actual class: 0
+incorrect ['this', 'is', 'a', 'disgrace']: guessed class: 1, actual class: 0
+incorrect ['left', 'very', 'frustrated']: guessed class: 1, actual class: 0
+incorrect ['ill', 'definitely', 'be', 'in', 'soon', 'again']: guessed class: 0, actual class: 1
+incorrect ['i', 'will', 'be', 'back', 'many', 'times', 'soon']: guessed class: 0, actual class: 1
+incorrect ['i', 'would', 'recommend', 'saving', 'room', 'for', 'this']: guessed class: 0, actual class: 1
+incorrect ['if', 'you', 'look', 'for', 'authentic', 'thai', 'food', 'go', 'else', 'where']: guessed class: 1, actual class: 0
+incorrect ['we', 'made', 'the', 'drive', 'all', 'the', 'way', 'from', 'north', 'scottsdale', 'and', 'i', 'was', 'not', 'one', 'bit', 'disappointed']: guessed class: 0, actual class: 1
+incorrect ['i', 'cant', 'wait', 'to', 'go', 'back']: guessed class: 0, actual class: 1
+incorrect ['2', 'thumbs', 'up']: guessed class: 0, actual class: 1
+incorrect ['never', 'had', 'anything', 'to', 'complain', 'about', 'here']: guessed class: 0, actual class: 1
+incorrect ['the', 'service', 'here', 'is', 'fair', 'at', 'best']: guessed class: 1, actual class: 0
+
+
+===================
+= RESULTS:
+= Correct:   482
+= Incorrect: 17
+=------------------
+= Accuracy:  96.59%
+===================
+
+
+===========================
+= Testing on testing data =
+===========================
+
+
+=============================
+= Incorrect Classifications =
+=============================
+incorrect ['this', 'was', 'like', 'the', 'final', 'blow']: guessed class: 1, actual class: 0
+incorrect ['i', 'found', 'this', 'place', 'by', 'accident', 'and', 'i', 'could', 'not', 'be', 'happier']: guessed class: 0, actual class: 1
+incorrect ['service', 'sucks']: guessed class: 1, actual class: 0
+incorrect ['the', 'portion', 'was', 'huge']: guessed class: 0, actual class: 1
+incorrect ['the', 'heart', 'attack', 'grill', 'in', 'downtown', 'vegas', 'is', 'an', 'absolutely', 'flatlined', 'excuse', 'for', 'a', 'restaurant']: guessed class: 1, actual class: 0
+incorrect ['the', 'salad', 'had', 'just', 'the', 'right', 'amount', 'of', 'sauce', 'to', 'not', 'over', 'power', 'the', 'scallop', 'which', 'was', 'perfectly', 'cooked']: guessed class: 0, actual class: 1
+incorrect ['the', 'deal', 'included', '5', 'tastings', 'and', '2', 'drinks', 'and', 'jeff', 'went', 'above', 'and', 'beyond', 'what', 'we', 'expected']: guessed class: 0, actual class: 1
+incorrect ['the', 'pan', 'cakes', 'everyone', 'are', 'raving', 'about', 'taste', 'like', 'a', 'sugary', 'disaster', 'tailored', 'to', 'the', 'palate', 'of', 'a', 'six', 'year', 'old']: guessed class: 1, actual class: 0
+incorrect ['this', 'is', 'one', 'of', 'the', 'better', 'buffets', 'that', 'i', 'have', 'been', 'to']: guessed class: 0, actual class: 1
+incorrect ['check', 'it', 'out']: guessed class: 0, actual class: 1
+incorrect ['ive', 'had', 'better', 'atmosphere']: guessed class: 1, actual class: 0
+incorrect ['my', 'husband', 'and', 'i', 'ate', 'lunch', 'here', 'and', 'were', 'very', 'disappointed', 'with', 'the', 'food', 'and', 'service']: guessed class: 1, actual class: 0
+incorrect ['this', 'really', 'is', 'how', 'vegas', 'fine', 'dining', 'used', 'to', 'be', 'right', 'down', 'to', 'the', 'menus', 'handed', 'to', 'the', 'ladies', 'that', 'have', 'no', 'prices', 'listed']: guessed class: 0, actual class: 1
+incorrect ['the', 'service', 'here', 'leaves', 'a', 'lot', 'to', 'be', 'desired']: guessed class: 1, actual class: 0
+incorrect ['love', 'this', 'place', 'hits', 'the', 'spot', 'when', 'i', 'want', 'something', 'healthy', 'but', 'not', 'lacking', 'in', 'quantity', 'or', 'flavor']: guessed class: 0, actual class: 1
+incorrect ['when', 'my', 'order', 'arrived', 'one', 'of', 'the', 'gyros', 'was', 'missing']: guessed class: 1, actual class: 0
+incorrect ['the', 'warm', 'beer', 'didnt', 'help']: guessed class: 1, actual class: 0
+incorrect ['ive', 'lived', 'here', 'since', '1979', 'and', 'this', 'was', 'the', 'first', 'and', 'last', 'time', 'ive', 'stepped', 'foot', 'into', 'this', 'place']: guessed class: 1, actual class: 0
+incorrect ['must', 'have', 'been', 'an', 'off', 'night', 'at', 'this', 'place']: guessed class: 1, actual class: 0
+incorrect ['extremely', 'tasty']: guessed class: 0, actual class: 1
+incorrect ['the', 'folks', 'at', 'otto', 'always', 'make', 'us', 'feel', 'so', 'welcome', 'and', 'special']: guessed class: 0, actual class: 1
+incorrect ['the', 'descriptions', 'said', 'yum', 'yum', 'sauce', 'and', 'another', 'said', 'eel', 'sauce', '', 'yet', 'another', 'said', 'spicy', 'mayo', 'well', 'none', 'of', 'the', 'rolls', 'had', 'sauces', 'on', 'them']: guessed class: 1, actual class: 0
+incorrect ['much', 'better', 'than', 'the', 'other', 'ayce', 'sushi', 'place', 'i', 'went', 'to', 'in', 'vegas']: guessed class: 0, actual class: 1
+incorrect ['i', 'hope', 'this', 'place', 'sticks', 'around']: guessed class: 0, actual class: 1
+incorrect ['the', 'goat', 'taco', 'didnt', 'skimp', 'on', 'the', 'meat', 'and', 'wow', 'what', 'flavor']: guessed class: 0, actual class: 1
+incorrect ['i', 'went', 'to', 'bachi', 'burger', 'on', 'a', 'friends', 'recommendation', 'and', 'was', 'not', 'disappointed']: guessed class: 0, actual class: 1
+incorrect ['this', 'place', 'is', 'not', 'quality', 'sushi', 'it', 'is', 'not', 'a', 'quality', 'restaurant']: guessed class: 1, actual class: 0
+incorrect ['please', 'stay', 'away', 'from', 'the', 'shrimp', 'stir', 'fried', 'noodles']: guessed class: 1, actual class: 0
+incorrect ['you', 'wont', 'be', 'disappointed']: guessed class: 0, actual class: 1
+incorrect ['there', 'is', 'nothing', 'authentic', 'about', 'this', 'place']: guessed class: 1, actual class: 0
+incorrect ['it', 'shouldnt', 'take', '30', 'min', 'for', 'pancakes', 'and', 'eggs']: guessed class: 1, actual class: 0
+incorrect ['sadly', 'gordon', 'ramseys', 'steak', 'is', 'a', 'place', 'we', 'shall', 'sharply', 'avoid', 'during', 'our', 'next', 'trip', 'to', 'vegas']: guessed class: 1, actual class: 0
+incorrect ['best', 'fish', 'ive', 'ever', 'had', 'in', 'my', 'life']: guessed class: 0, actual class: 1
+incorrect ['this', 'place', 'deserves', 'one', 'star', 'and', '90', 'has', 'to', 'do', 'with', 'the', 'food']: guessed class: 1, actual class: 0
+incorrect ['def', 'coming', 'back', 'to', 'bowl', 'next', 'time']: guessed class: 0, actual class: 1
+incorrect ['to', 'summarize', 'the', 'food', 'was', 'incredible', 'nay', 'transcendant', 'but', 'nothing', 'brings', 'me', 'joy', 'quite', 'like', 'the', 'memory', 'of', 'the', 'pneumatic', 'condiment', 'dispenser']: guessed class: 0, actual class: 1
+incorrect ['this', 'one', 'is', 'simply', 'a', 'disappointment']: guessed class: 1, actual class: 0
+incorrect ['i', 'dont', 'know', 'what', 'kind', 'it', 'is', 'but', 'they', 'have', 'the', 'best', 'iced', 'tea']: guessed class: 0, actual class: 1
+incorrect ['i', 'can', 'assure', 'you', 'that', 'you', 'wont', 'be', 'disappointed']: guessed class: 0, actual class: 1
+incorrect ['furthermore', 'you', 'cant', 'even', 'find', 'hours', 'of', 'operation', 'on', 'the', 'website']: guessed class: 1, actual class: 0
+incorrect ['no', 'complaints']: guessed class: 0, actual class: 1
+incorrect ['if', 'youre', 'not', 'familiar', 'check', 'it', 'out']: guessed class: 0, actual class: 1
+incorrect ['love', 'the', 'margaritas', 'too']: guessed class: 0, actual class: 1
+incorrect ['this', 'was', 'my', 'first', 'and', 'only', 'vegas', 'buffet', 'and', 'it', 'did', 'not', 'disappoint']: guessed class: 0, actual class: 1
+incorrect ['the', 'one', 'down', 'note', 'is', 'the', 'ventilation', 'could', 'use', 'some', 'upgrading']: guessed class: 1, actual class: 0
+incorrect ['third', 'the', 'cheese', 'on', 'my', 'friends', 'burger', 'was', 'cold']: guessed class: 1, actual class: 0
+incorrect ['the', 'selection', 'of', 'food', 'was', 'not', 'the', 'best']: guessed class: 1, actual class: 0
+incorrect ['it', 'was', 'attached', 'to', 'a', 'gas', 'station', 'and', 'that', 'is', 'rarely', 'a', 'good', 'sign']: guessed class: 1, actual class: 0
+incorrect ['the', 'menu', 'had', 'so', 'much', 'good', 'stuff', 'on', 'it', 'i', 'could', 'not', 'decide']: guessed class: 0, actual class: 1
+incorrect ['conclusion', 'very', 'filling', 'meals']: guessed class: 0, actual class: 1
+incorrect ['the', 'pancake', 'was', 'also', 'really', 'good', 'and', 'pretty', 'large', 'at', 'that']: guessed class: 0, actual class: 1
+incorrect ['id', 'rather', 'eat', 'airline', 'food', 'seriously']: guessed class: 1, actual class: 0
+incorrect ['i', 'dont', 'each', 'much', 'pasta', 'but', 'i', 'love', 'the', 'homemade', 'hand', 'made', 'pastas', 'and', 'thin', 'pizzas', 'here']: guessed class: 0, actual class: 1
+incorrect ['point', 'your', 'finger', 'at', 'any', 'item', 'on', 'the', 'menu', 'order', 'it', 'and', 'you', 'wont', 'be', 'disappointed']: guessed class: 0, actual class: 1
+incorrect ['first', 'time', 'there', 'and', 'might', 'just', 'be', 'the', 'last']: guessed class: 1, actual class: 0
+incorrect ['i', 'had', 'the', 'opportunity', 'today', 'to', 'sample', 'your', 'amazing', 'pizzas']: guessed class: 0, actual class: 1
+incorrect ['not', 'even', 'a', 'hello', 'we', 'will', 'be', 'right', 'with', 'you']: guessed class: 1, actual class: 0
+incorrect ['i', 'guess', 'maybe', 'we', 'went', 'on', 'an', 'off', 'night', 'but', 'it', 'was', 'disgraceful']: guessed class: 1, actual class: 0
+incorrect ['i', 'heart', 'this', 'place']: guessed class: 0, actual class: 1
+incorrect ['i', 'will', 'never', 'go', 'back', 'to', 'this', 'place', 'and', 'will', 'never', 'ever', 'recommended', 'this', 'place', 'to', 'anyone']: guessed class: 1, actual class: 0
+incorrect ['an', 'hour', 'seriously']: guessed class: 1, actual class: 0
+incorrect ['as', 'for', 'the', 'service', 'im', 'a', 'fan', 'because', 'its', 'quick', 'and', 'youre', 'being', 'served', 'by', 'some', 'nice', 'folks']: guessed class: 0, actual class: 1
+incorrect ['omg', 'i', 'felt', 'like', 'i', 'had', 'never', 'eaten', 'thai', 'food', 'until', 'this', 'dish']: guessed class: 0, actual class: 1
+incorrect ['couldnt', 'ask', 'for', 'a', 'more', 'satisfying', 'meal']: guessed class: 0, actual class: 1
+incorrect ['any', 'grandmother', 'can', 'make', 'a', 'roasted', 'chicken', 'better', 'than', 'this', 'one']: guessed class: 1, actual class: 0
+incorrect ['same', 'evening', 'him', 'and', 'i', 'are', 'both', 'drastically', 'sick']: guessed class: 1, actual class: 0
+incorrect ['tried', 'to', 'go', 'here', 'for', 'lunch', 'and', 'it', 'was', 'a', 'madhouse']: guessed class: 1, actual class: 0
+incorrect ['it', 'was', 'just', 'not', 'a', 'fun', 'experience']: guessed class: 0, actual class: 1
+incorrect ['very', 'convenient', 'since', 'we', 'were', 'staying', 'at', 'the', 'mgm']: guessed class: 0, actual class: 1
+incorrect ['the', 'sweet', 'potato', 'tots', 'were', 'good', 'but', 'the', 'onion', 'rings', 'were', 'perfection', 'or', 'as', 'close', 'as', 'i', 'have', 'had']: guessed class: 0, actual class: 1
+incorrect ['i', 'promise', 'they', 'wont', 'disappoint']: guessed class: 0, actual class: 1
+incorrect ['as', 'a', 'sushi', 'lover', 'avoid', 'this', 'place', 'by', 'all', 'means']: guessed class: 1, actual class: 0
+incorrect ['i', 'gave', 'it', '5', 'stars', 'then', 'and', 'im', 'giving', 'it', '5', 'stars', 'now']: guessed class: 0, actual class: 1
+incorrect ['the', 'steak', 'was', 'amazingrge', 'fillet', 'relleno', 'was', 'the', 'best', 'seafood', 'plate', 'i', 'have', 'ever', 'had']: guessed class: 0, actual class: 1
+incorrect ['i', 'work', 'in', 'the', 'hospitality', 'industry', 'in', 'paradise', 'valley', 'and', 'have', 'refrained', 'from', 'recommending', 'cibo', 'any', 'longer']: guessed class: 1, actual class: 0
+incorrect ['that', 'said', 'our', 'mouths', 'and', 'bellies', 'were', 'still', 'quite', 'pleased']: guessed class: 0, actual class: 1
+incorrect ['after', 'one', 'bite', 'i', 'was', 'hooked']: guessed class: 0, actual class: 1
+incorrect ['one', 'nice', 'thing', 'was', 'that', 'they', 'added', 'gratuity', 'on', 'the', 'bill', 'since', 'our', 'party', 'was', 'larger', 'than', '6', 'or', '8', 'and', 'they', 'didnt', 'expect', 'more', 'tip', 'than', 'that']: guessed class: 0, actual class: 1
+incorrect ['as', 'for', 'the', 'service', 'i', 'thought', 'it', 'was', 'good']: guessed class: 0, actual class: 1
+incorrect ['there', 'was', 'a', 'warm', 'feeling', 'with', 'the', 'service', 'and', 'i', 'felt', 'like', 'their', 'guest', 'for', 'a', 'special', 'treat']: guessed class: 0, actual class: 1
+incorrect ['i', 'got', 'to', 'enjoy', 'the', 'seafood', 'salad', 'with', 'a', 'fabulous', 'vinegrette']: guessed class: 0, actual class: 1
+incorrect ['the', 'wontons', 'were', 'thin', 'not', 'thick', 'and', 'chewy', 'almost', 'melt', 'in', 'your', 'mouth']: guessed class: 0, actual class: 1
+incorrect ['the', 'service', 'was', 'poor', 'and', 'thats', 'being', 'nice']: guessed class: 1, actual class: 0
+incorrect ['the', 'place', 'was', 'not', 'clean', 'and', 'the', 'food', 'oh', 'so', 'stale']: guessed class: 1, actual class: 0
+incorrect ['one', 'of', 'the', 'few', 'places', 'in', 'phoenix', 'that', 'i', 'would', 'definately', 'go', 'back', 'to', 'again', '']: guessed class: 0, actual class: 1
+incorrect ['so', 'in', 'a', 'nutshell', '1', 'the', 'restaraunt', 'smells', 'like', 'a', 'combination', 'of', 'a', 'dirty', 'fish', 'market', 'and', 'a', 'sewer']: guessed class: 1, actual class: 0
+incorrect ['i', 'dont', 'have', 'very', 'many', 'words', 'to', 'say', 'about', 'this', 'place', 'but', 'it', 'does', 'everything', 'pretty', 'well']: guessed class: 0, actual class: 1
+incorrect ['when', 'i', 'received', 'my', 'pita', 'it', 'was', 'huge', 'it', 'did', 'have', 'a', 'lot', 'of', 'meat', 'in', 'it', 'so', 'thumbs', 'up', 'there']: guessed class: 0, actual class: 1
+incorrect ['im', 'super', 'pissd']: guessed class: 1, actual class: 0
+incorrect ['i', 'can', 'say', 'that', 'the', 'desserts', 'were', 'yummy']: guessed class: 0, actual class: 1
+incorrect ['do', 'yourself', 'a', 'favor', 'and', 'stay', 'away', 'from', 'this', 'dish']: guessed class: 1, actual class: 0
+incorrect ['for', '40', 'bucks', 'a', 'head', 'i', 'really', 'expect', 'better', 'food']: guessed class: 1, actual class: 0
+incorrect ['in', 'fact', 'im', 'going', 'to', 'round', 'up', 'to', '4', 'stars', 'just', 'because', 'she', 'was', 'so', 'awesome']: guessed class: 0, actual class: 1
+incorrect ['i', 'found', 'a', 'six', 'inch', 'long', 'piece', 'of', 'wire', 'in', 'my', 'salsa']: guessed class: 1, actual class: 0
+incorrect ['i', 'seriously', 'cannot', 'believe', 'that', 'the', 'owner', 'has', 'so', 'many', 'unexperienced', 'employees', 'that', 'all', 'are', 'running', 'around', 'like', 'chickens', 'with', 'their', 'heads', 'cut', 'off']: guessed class: 1, actual class: 0
+incorrect ['this', 'place', 'is', 'disgusting']: guessed class: 1, actual class: 0
+incorrect ['the', 'tables', 'outside', 'are', 'also', 'dirty', 'a', 'lot', 'of', 'the', 'time', 'and', 'the', 'workers', 'are', 'not', 'always', 'friendly', 'and', 'helpful', 'with', 'the', 'menu']: guessed class: 1, actual class: 0
+incorrect ['insults', 'profound', 'deuchebaggery', 'and', 'had', 'to', 'go', 'outside', 'for', 'a', 'smoke', 'break', 'while', 'serving', 'just', 'to', 'solidify', 'it']: guessed class: 1, actual class: 0
+incorrect ['i', 'would', 'avoid', 'this', 'place', 'if', 'you', 'are', 'staying', 'in', 'the', 'mirage']: guessed class: 1, actual class: 0
+
+
+===================
+= RESULTS:
+= Correct:   398
+= Incorrect: 99
+=------------------
+= Accuracy:  80.08%
+===================

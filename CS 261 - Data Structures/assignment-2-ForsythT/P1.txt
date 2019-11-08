@@ -1,0 +1,5 @@
+1. Yes, we can shrink without causing an error. The only issue I can find is that the oldCapacity variable would be larger than how much data you actually have, so it would be inefficient as it goes through the rest of the loop doing nothing.
+
+2. The only function that NEEDS to be modified is removeAtDynArr.c as this is the only place where the data will be shrinking in size.
+
+3. Breaking the encapsulation is bad as encapsulation binds together data and functions that manipulate data and keeps it from outside interference. When encapsulation is broken, then outside interference and misuse is plausible which could lead to unwanted errors.
