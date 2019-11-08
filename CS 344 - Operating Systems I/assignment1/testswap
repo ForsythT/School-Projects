@@ -1,0 +1,20 @@
+#!/bin/bash
+inputFile="tempinputfile"
+tempCol="tempcolfile"
+tempRow="temprowfile"
+
+touch $tempCol
+while read myRow
+do
+	num=1
+	for i in $myRow
+	do
+		echo "num = $num"
+		cut -f $num $1 >> $tempCol
+		num=$(expr $num + 1)
+	done
+done < $1
+cat $1
+cat $tempCol
+#cat $tempCol | tr '\n' '\t' > "$tempRow"
+rm -f $tempCol

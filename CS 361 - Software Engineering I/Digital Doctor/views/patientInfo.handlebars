@@ -1,0 +1,52 @@
+<body>
+  <h1 id="mainHeader">DIGITAL DOCTOR</h1>
+ <div id="centerDiv">
+      <h2 id="header1">Personal Information</h2>
+      <div id="showInfoDiv">
+        {{#each results}}
+          <div id="showMedHx">Medical history: {{{this.medHx}}}</div>
+          <div id="showInsId">Insurance ID: {{{this.insID}}}</div>
+          <div id="showInsCo">Insurance Compnay: {{{this.insCo}}}</div>
+          <div id="showCard">Credit Card: {{{this.card}}}</div>
+          <div id="showAddr">Street address: {{{this.addr}}}</div>
+          <div id="showCity">City: {{{this.city}}}</div>
+          <div id="showState">State: {{{this.state}}}</div>
+          <div id="showZip">Zip: {{{this.zip}}}</div>
+          <div id="showPharm">Preferred Pharmacy: {{{this.pharm}}}</div>
+          <div id="showPharmZip">Pharmacy Zip: {{{this.pharmZip}}}</div>
+        {{/each}}
+        {{#if consent}}
+        <div id="showPharmZip">Privacy info has been read</div>
+        {{else}}
+        <div id="showPharmZip">Privacy info has not been read</div>
+        {{/if}}
+      </div>
+      <h2 id="header2">Update Information</h2>
+      <div id="updateInfoDiv">
+          <form id="form1">
+          	<fieldset id="patientInfoForm">
+            {{#each results}}
+                  <legend>Patient Information</legend>
+                    Medical History: <textarea id="medHx">{{{this.medHx}}}</textArea> <br>
+                    Insurance ID: <input id="insID" type="text" name="text_input" value="{{{this.insID}}}"> <br>
+                    Insurance Company: <input id="insCo" type="text" name="text_input" value="{{{this.insCo}}}"> <br>
+                    Credit card: <input id="creditCard" type="text" name="text_input" value="{{{this.card}}}"> <br>
+                    <fieldset>
+                      <Legend>Billing Address</legend>
+                        Address: <input id="address" type="text" name="text_input" value="{{{this.addr}}}"> <br>
+                        City: <input id="city" type="text" name="text_input" value="{{{this.city}}}"> <br>
+                        State: <input id="state" type="text" name="text_input" value="{{{this.state}}}"> <br>
+                        Zip: <input id="zip" type="text" name="text_input" value="{{{this.zip}}}"> <br>
+                    </fieldset>
+                    Preferred Pharmacy: <input id="pharm" type="text" name="text_input" value="{{{this.pharm}}}"> <br>
+                    Pharmacy Zip: <input id="pharmZip" type="Zip" name="text_input" value="{{{this.pharmZip}}}"> <br>
+                    I have received and read my privacy notice: <input id="hipaa" type="checkbox" value="{{{this.consent}}}"> <br>
+                  <input type="submit" id="submit" value="Save information" onclick="updatePatientInfo()">
+            {{/each}}
+          	</fieldset>
+          </form>
+      </div>
+      <div id="response"></div>
+  </div>
+</body>
+

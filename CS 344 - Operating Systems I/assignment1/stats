@@ -1,0 +1,266 @@
+#################### Assignment 1 ####################
+## Author: Tim Forsyth                              ##
+## Description: A bash script that calculates the   ##
+## averages and medians of rows or columns of data  ##
+## Args: -rows or -cols and a file containing data  ##
+######################################################
+
+#!/bin/bash
+
+# All of the temp files that will be used in this script
+
+data="datafile$$"
+tempRow="temprowfile$$"
+tempSort="tempsortfile$$"
+tempSortRow="tempsortrowfile$$"
+tempSortCol="tempsortcolfile$$"
+tempMid="tempmidfile$$"
+tempEvenMid="tempevenmidfile$$"
+tempHold="tempholdfile$$"
+tempRotate="temprotatefile$$"
+tempFullRotate="tempfullrotatefile$$"
+tempColFinal="tempcolfinalfile$$"
+
+# A trapping signal to catch an early exit to clean up temp files
+
+trap "rm -f $data $tempRow $tempSort $tempSortRow $tempSortCol $tempMid $tempEvenMid $tempHold $tempRotate $tempFullRotate $tempColFinal; echo 'CTRL+C recieved, exiting'; exit 1" INT HUP TERM
+
+# This checks how many arguments were given to the script
+# If there is only 1 argument, it puts the file into a temp data file
+
+if [ "$#" = "1" ]
+then
+	cat > "$data"
+
+# If there are 2 arguments then it takes the second argument as the file
+
+elif [ "$#" = "2" ]
+then
+	data=$2
+
+# Any other scenario there are either too few or too many arguments, so it sends an error message and exits
+
+else
+	printf "./stats: {-rows|cols} [file]\n" 1>&2
+	exit 1
+fi
+
+# This checks if the file is not readble. If it isn't, an error message is sent and the script exits
+
+if [ ! -r $data ]
+then
+	printf "./stats: cannot read $data\n" 1>&2
+	exit 1
+fi
+
+# This is simply counting how many columns there should be. 
+# Since each row should have the same amount of columns, I'm simply just using the first row as the precedent.
+
+read firstRow < $data
+for i in $firstRow
+do
+	((numCols++))
+done
+
+# This uses the number of columns set from the first row and compares to the rest.
+# If there are any rows with too many columns, an error message is sent and the script exits.
+
+while read myRow
+do
+	cols=0
+	for i in $myRow
+	do
+		((cols++))
+	done
+	if [[ $cols != $numCols ]]
+	then
+		printf "./stats {-rows|-cols} [file]\n" 1>&2
+		exit 1
+	fi
+done < $data
+
+# This chunk of code in the if statement is for calculating the row statistics.
+
+if [[ $1 == -r* ]]
+then	
+	printf "Calculating row stats.\n"
+	echo "Average	Median" > $tempRow
+	touch $tempSort
+
+	# This loops through the entirety of the data, one row/line at a time
+
+	while read myRow
+	do
+		sum=0
+		count=0
+		
+		# This goes through each number in the row and sums them all up.
+		# It also counts how many numbers there are in each row, however this isn't really necessary since I already have the number of columns.
+
+		for i in $myRow
+		do
+			sum=$(expr $sum + $i)
+			echo "$i" >> $tempSortCol
+			((count++))
+		done
+		
+		# Here I'm sorting the line of numbers in order to easily get the median.
+
+		sort -n $tempSortCol -o $tempSortCol
+		cat $tempSortCol | tr '\n' '\t' >> $tempSortRow
+		echo >> $tempSortRow
+		
+		# This is simply a check of whether there is an even or odd number of numbers
+
+		mod=$(expr $count % 2)
+
+		# If there are an even amount of numbers, I find the mean average of the middle 2 numbers to get the median
+		
+		if  [[ $mod == 0 ]]
+		then
+			mid=$(expr $count / 2)
+			cut -f $mid $tempSortRow >> $tempMid
+			((mid++))
+			cut -f $mid $tempSortRow >> $tempMid
+			cat $tempMid | tr '\n' '\t' >> $tempEvenMid
+			read evenMid < $tempEvenMid
+			medTotal=0
+			for i in $evenMid
+			do
+				medTotal=$(expr $medTotal + $i)
+			done
+			med=$(expr $(expr $medTotal + 1) / 2)
+
+		# Otherwise, there are an odd amount of numbers, so I can simply just use the middle most number as the median
+
+		else
+			mid=$(expr $(expr $count / 2) + 1)
+			cut -f $mid $tempSortRow >> $tempMid
+			read med < $tempMid
+		fi
+
+		# Cleaning up temp files		
+
+		rm -f $tempSortRow $tempSortCol	$tempMid $tempEvenMid
+		
+		# Calculating the averages
+		
+		avg=$(expr $(expr $sum + $(expr $count / 2)) / $count)	
+	
+		echo "$avg	$med" >> $tempRow
+	done < $data
+	
+	# This outputs the averages and medians
+	
+	cat $tempRow
+	
+	# More temp cleaning
+
+	rm -f $tempSort $tempRow
+
+# This next chunk of code is for the column argument.
+
+elif [[ $1 == -c* ]]
+then
+	printf "Calculating column stats.\n"
+	read oneLine < $data
+	count=1
+
+	# This rotates the data so the rows become columns and columns become rows, allowing me to use the exact same method of finding mean/median.	
+
+	touch $tempFullRotate
+	for i in $oneLine
+	do	
+		cut -f $count $data >> $tempHold
+		cat $tempHold | tr '\n' '\t' >> $tempRotate
+		echo >> $tempRotate
+		cat $tempRotate >> $tempFullRotate
+		((count++))
+		rm -f $tempRotate $tempHold
+	done
+	touch $tempRow
+	touch $tempSort
+	
+	# This is the exact same as finding the means/medians of the rows
+
+	while read myRow
+	do
+		sum=0
+		count=0
+		for i in $myRow
+		do
+			sum=$(expr $sum + $i)
+			echo "$i" >> $tempSortCol
+			((count++))
+		done
+
+		sort -n $tempSortCol -o $tempSortCol
+		cat $tempSortCol | tr '\n' '\t' >> $tempSortRow
+		echo >> $tempSortRow
+		mod=$(expr $count % 2)
+
+		if  [[ $mod == 0 ]]
+		then
+			mid=$(expr $count / 2)
+			cut -f $mid $tempSortRow >> $tempMid
+			((mid++))
+			cut -f $mid $tempSortRow >> $tempMid
+			cat $tempMid | tr '\n' '\t' >> $tempEvenMid
+			read evenMid < $tempEvenMid
+			medTotal=0
+			for i in $evenMid
+			do
+				medTotal=$(expr $medTotal + $i)
+			done
+			med=$(expr $(expr $medTotal + 1) / 2)
+
+		else
+			mid=$(expr $(expr $count / 2) + 1)
+			cut -f $mid $tempSortRow >> $tempMid
+			read med < $tempMid
+
+		fi
+		
+		# Cleaning files
+		
+		rm -f $tempSortRow $tempSortCol	$tempMid $tempEvenMid
+		
+		avg=$(expr $(expr $sum + $(expr $count / 2)) / $count)	
+	
+		echo "$avg	$med" >> $tempRow
+	done < $tempFullRotate
+	
+	# Cleaning up
+	
+	rm -f $tempSort $tempFullRotate
+	
+	# This last part is purely for formating so that the averages and medians will be displayed horizontally.
+
+	echo "Averages:" > $tempColFinal
+	cut -f 1 $tempRow >> $tempHold
+	cat $tempHold | tr '\n' '\t' >> $tempRotate
+	echo >> $tempRotate
+	cat $tempRotate >> $tempColFinal
+	echo "Medians:" >> $tempColFinal
+	rm -f $tempRotate $tempHold
+	cut -f 2 $tempRow >> $tempHold
+	cat $tempHold | tr '\n' '\t' >> $tempRotate
+	echo >> $tempRotate
+	cat $tempRotate >> $tempColFinal
+	rm -f $tempRotate $tempHold $tempRow
+	cat $tempColFinal
+	rm -f $tempColFinal
+
+# An error check for invalid arguments
+
+else
+	printf "./stats: stats {-rows|-cols} [file]\n" 1>&2
+	exit 1
+fi
+
+# This just cleans up the temp data file if it was created.
+
+if [ "$#" = "1" ]
+then
+	rm -f $data
+fi

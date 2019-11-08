@@ -1,0 +1,292 @@
+Express started on http://localhost:3310; press Ctrl-C to terminate.
+Currently logged in = nullDOP = null
+[ RowDataPacket {
+    UserName: 'User1',
+    Password: 'Pass1',
+    UserID: 111,
+    DorP: 'Doctor',
+    Pin: 1234 },
+  RowDataPacket {
+    UserName: 'User2',
+    Password: 'Pass3',
+    UserID: 222,
+    DorP: 'Patient',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'User3',
+    Password: 'Pass3',
+    UserID: 333,
+    DorP: 'Doctor',
+    Pin: 5678 },
+  RowDataPacket {
+    UserName: 'User4',
+    Password: 'Pass4',
+    UserID: 444,
+    DorP: 'Patient',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'test',
+    Password: 'test',
+    UserID: null,
+    DorP: 'P',
+    Pin: 8796 },
+  RowDataPacket {
+    UserName: 'test1',
+    Password: 'test1',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'test3',
+    Password: 'test3',
+    UserID: null,
+    DorP: 'D',
+    Pin: 8145 },
+  RowDataPacket {
+    UserName: 'test5',
+    Password: 'test5',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'user10',
+    Password: 'pass10',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'user11',
+    Password: 'pass11',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'test10',
+    Password: 'test10',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'test@testing.com',
+    Password: 'nnnn',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'happy@test.com',
+    Password: 'nnnn',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'test11',
+    Password: 'test11',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'test12',
+    Password: 'test12',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'email',
+    Password: 'password',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'email@gmail.com',
+    Password: 'password',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'forsythtim96@gmail.com',
+    Password: 'password',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'emai',
+    Password: 'pass',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'newAcc',
+    Password: 'newPass',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'newDoc',
+    Password: 'newPass',
+    UserID: null,
+    DorP: 'D',
+    Pin: 7725 } ]
+[ RowDataPacket {
+    userName: 'asdf',
+    firstName: 'jhg',
+    lastName: 'yvuy',
+    city: 'g',
+    state: 'jhghv',
+    license: 'ytj',
+    ref1: 'jhg',
+    ref2: 'uygv',
+    ref3: 'jhgjh' } ]
+Valid user user4 pass4 444 444
+Data saved for user 444
+Data saved for user 444
+Data saved for user 444
+Data saved for user 444
+Data saved for user 444
+Data saved for user 444
+Data saved for user 444
+Data saved for user 444
+Data saved for user 444
+Data saved for user 444
+Data saved for user 444
+Data saved for user 444
+Currently logged in = 444DOP = P
+[ RowDataPacket {
+    UserName: 'User1',
+    Password: 'Pass1',
+    UserID: 111,
+    DorP: 'Doctor',
+    Pin: 1234 },
+  RowDataPacket {
+    UserName: 'User2',
+    Password: 'Pass3',
+    UserID: 222,
+    DorP: 'Patient',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'User3',
+    Password: 'Pass3',
+    UserID: 333,
+    DorP: 'Doctor',
+    Pin: 5678 },
+  RowDataPacket {
+    UserName: 'User4',
+    Password: 'Pass4',
+    UserID: 444,
+    DorP: 'Patient',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'test',
+    Password: 'test',
+    UserID: null,
+    DorP: 'P',
+    Pin: 8796 },
+  RowDataPacket {
+    UserName: 'test1',
+    Password: 'test1',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'test3',
+    Password: 'test3',
+    UserID: null,
+    DorP: 'D',
+    Pin: 8145 },
+  RowDataPacket {
+    UserName: 'test5',
+    Password: 'test5',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'user10',
+    Password: 'pass10',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'user11',
+    Password: 'pass11',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'test10',
+    Password: 'test10',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'test@testing.com',
+    Password: 'nnnn',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'happy@test.com',
+    Password: 'nnnn',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'test11',
+    Password: 'test11',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'test12',
+    Password: 'test12',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'email',
+    Password: 'password',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'email@gmail.com',
+    Password: 'password',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'forsythtim96@gmail.com',
+    Password: 'password',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'emai',
+    Password: 'pass',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'newAcc',
+    Password: 'newPass',
+    UserID: null,
+    DorP: 'P',
+    Pin: null },
+  RowDataPacket {
+    UserName: 'newDoc',
+    Password: 'newPass',
+    UserID: null,
+    DorP: 'D',
+    Pin: 7725 } ]
+[ RowDataPacket {
+    userName: 'asdf',
+    firstName: 'jhg',
+    lastName: 'yvuy',
+    city: 'g',
+    state: 'jhghv',
+    license: 'ytj',
+    ref1: 'jhg',
+    ref2: 'uygv',
+    ref3: 'jhgjh' } ]
+Invalid username, password, or PIN user1 pass1 123
+Valid user user1 pass1 1234
+Data saved for user 111
+Data saved for user 111

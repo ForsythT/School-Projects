@@ -1,0 +1,41 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww15860\viewh8380\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 To get server running, \
+1. upload "Website" folder to your flip account\
+2. shell into flip server of your choice (examples below are for flip2)\
+3. navigate to directory in which "Website" is located (e.g. ~/CS361/Website)\
+4. run command "./node_modules/forever/bin/forever start -o out.log serverScript.js"\
+5. If you wish to stop the server, run command "./node_modules/forever/bin/forever stopall"\
+6. Note that an out.log file is created, which contains the console.log output. I'd recommend\
+	running the command "tail -f out.log" in a separate terminal to easily see the output\
+\
+To test logins, \
+1. Navigate to flip2.engr.oregonstate.edu:3310 (make sure you are VPN'd into OSU)\
+2. enter "user4" into the Patient Login Username field\
+3. enter "pass4" into the Patient Login Password field\
+4. You should see "Valid Patient! [\{"UserID":444\}]" appear below the div\
+5. enter "user1" into the Doctor Login Username field\
+6. enter "pass1" into the Doctor Login Password field\
+7. enter "1234" into the Doctor PIN# field\
+7. You should see "Valid Doctor! [\{"UserID":111\}]" appear below the div \
+\
+To test creating accounts,\
+1. Navigate to flip2.engr.oregonstate.edu:3310/register\
+2. Fill out fields with desired values\
+3. **Upon submit, you should see "New account for " + the username chosen appear below the div\
+	Note: currently, values are being validated in the server's log file, which outputs "New account for " + the user chosen\
+\
+To test doctor applying,\
+1. Navigate to flip2.engr.oregonstate.edu:3310/docApp\
+2. Fill out fields\
+3. **Upon submit, you should see "New doctor application for " + the username appear below the div\
+	Note: currently, values are being validated in the server's log file, which outputs "New doctor application for " + username\
+\
+\
+\
+}

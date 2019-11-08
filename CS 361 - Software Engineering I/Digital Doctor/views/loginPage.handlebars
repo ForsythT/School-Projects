@@ -1,0 +1,26 @@
+    <h1 id="mainHeader">DIGITAL DOCTOR</h1>
+   <div id="centerDiv">
+        <h2 id="header2">Log In Here</h2>
+        <div id="div1">
+            <form id="form1" >
+            	<fieldset>
+                    <legend>Patient Login</legend>
+                	Username: <input id="patientUserName" type="text" name="text_input"><br>
+                    Password: <input id="patientPassword" type="password" name="password_input"><br>
+                    <input type="submit" name="button" id="patientLogIn" value="Log In" onclick="logInPatient()">
+            	</fieldset>
+            </form>
+        </div>
+        <div id="div2">
+            <form id="2" >
+                <fieldset>
+                <legend>Doctor Login</legend>
+                    Username: <input id="doctorUserName" type="text" name="text_input"><br>
+                    Password: <input id="doctorPassword" type="password" name="password_input"><br>
+                    Pin#: <input id="doctorPin" type="number" name="numerical_input"><br>
+                    <input type="submit" name="button" id="doctorLogIn" value="Log In" onclick="logInDoctor()">
+                </fieldset>
+            </form>
+        </div>
+        <div id="response"></div>
+    </div>

@@ -1,0 +1,30 @@
+<body>
+  <h1 id="mainHeader">DIGITAL DOCTOR</h1>
+ <div id="centerDiv">
+      <h2 id="header1">Doctor Information</h2>
+      <div id="showInfoDiv">
+        {{#each results}}
+          <div id="showMedHx">Doctor's Hours: {{{this.hours}}}</div>
+          <div id="showInsId">Doctor's Specialty: {{{this.specialty}}}</div>
+          <div id="showInsCo">Patient Types: {{{this.patientTypes}}}</div>
+          <div id="showCard">Accepted Insurance: {{{this.insTypes}}}</div>
+        {{/each}}
+      </div>
+      <h2 id="header2">Update Information</h2>
+      <div id="updateInfoDiv">
+          <form id="form1">
+          	<fieldset id="doctorInfoForm">
+            {{#each results}}
+                  <legend>Doctor Information</legend>
+                    Doctor's Hours: <textarea id="hours">{{{this.hours}}}</textArea> <br>
+                    Doctor's Specialty: <input id="specialty" type="text" name="text_input" value="{{{this.specialty}}}"> <br>
+                    Patient Types: <input id="patientTypes" type="text" name="text_input" value="{{{this.patientTypes}}}"> <br>
+                    Accepted Insurance: <input id="insTypes" type="text" name="text_input" value="{{{this.insTypes}}}"> <br>
+                  <input type="submit" id="submit" value="Save information" onclick="updateDoctorInfo()">
+            {{/each}}
+          	</fieldset>
+          </form>
+      </div>
+      <div id="response"></div>
+  </div>
+</body>

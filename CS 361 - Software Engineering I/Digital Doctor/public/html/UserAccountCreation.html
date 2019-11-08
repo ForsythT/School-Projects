@@ -1,0 +1,128 @@
+<!-- Author: Matthew Frank
+** Course: CS 361
+** Assignment: Final Project
+** Date: 03/08/2018
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Digital Doctor</title>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+</head>
+
+<body style="color:#ad1a1a; padding-top: 100px">
+
+    <style>
+        .navbar-inverse .navbar-nav>li>a {
+            color: white;
+        }
+
+        .navbar-inverse .navbar-brand {
+            color: white;
+        }
+    </style>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top" style="background: #ad1a1a;">
+        <div class="container">
+            <div class="navbar-header">
+                <a href="#" class="navbar-brand">
+                    <span class="glyphicon glyphicon-tint" aria-hidden="true"></span>Digital Doctor</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li>
+                    <a id="loginLink" href="#">Log In</a>
+                </li>
+                <li>
+                    <a id="signupLink" href="#">Sign Up</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="jumbotron">
+            <p>Welcome to the Digital Doctor!</p>
+
+            <div id="userTypeSelector" class="form-group" style="display: none">
+                <p>Are you a patient, or a doctor?</p>
+                <label class="radio-inline">
+                    <input id="patientselector" name="userTypeSelector" type="radio" value="patient" required>Patient
+                </label>
+                <label class="radio-inline">
+                    <input id="doctorSelector" name="userTypeSelector" type="radio" value="doctor" required>Doctor
+                </label>
+            </div>
+
+            <!--- 
+                The user login form with e-mail and password fields,
+                this hidden until the user clicks "Login" along the
+                header bar.
+            -->
+            <div id="userLoginDiv" style="display: none">
+                <form id="userLoginForm" method="get" style="display: none">
+                    <p>Please log in using your e-mail address and password.</p>
+                    <fieldset>
+                        <div>
+                            <label for="loginemail">Email:
+                                <input id="loginemail" name="loginemail" type="email" required>
+                            </label>
+                        </div>
+                        <div>
+                            <label for="loginpassword">Password:
+                                <input id="loginpassword" name="loginpassword" type="password" required>
+                            </label>
+                        </div>
+                        <div id="doctorPin">
+                            <label for="loginpin">Pin:
+                                <input id="loginpin" name="loginpin" type="password" required>
+                            </label>
+                        </div>
+
+                        <input id="submitlogin" type="submit">
+                    </fieldset>
+                </form>
+            </div>
+
+            <!--- 
+                The user sign up form with e-mail and password fields,
+                this hidden until the user clicks "Sign Up" along the
+                header bar.
+            -->
+            <div id="newAccountDiv" style="display: none">
+                <form id="newUserAccountForm" method="post">
+                    <div id="accountTypeSelector" class="form-group">
+                        <p>Are you a patient, or a doctor?</p>
+                        <label class="radio-inline">
+                            <input id="patientAccountSelector" name="userTypeSelector" type="radio" value="patient" required>Patient
+                        </label>
+                        <label class="radio-inline">
+                            <input id="doctorAccountSelector" name="userTypeSelector" type="radio" value="doctor" required>Doctor
+                        </label>
+                    </div>
+
+                    <fieldset id="newAccountForm">
+                        <p>To create an account, please provide us with your e-mail, and desired password</p>
+                        <div>
+                            <label for="signupemail">Email</label>
+                            <input id="signupemail" name="signupemail" type="email" required>
+                        </div>
+                        <div>
+                            <label for="signuppassword">Password</label>
+                            <input id="signuppassword" name="signuppassword" type="password" required>
+                        </div>
+                        <input id="submitsignup" type="submit">
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <body>
+        <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src="landingPage.js"></script>
+    </body>
+
+</html>
